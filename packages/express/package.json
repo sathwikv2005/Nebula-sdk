@@ -1,0 +1,33 @@
+{
+	"name": "@nebula-sdk/express",
+	"version": "0.1.0",
+	"description": "Express integration for Nebula device authentication",
+	"license": "MIT",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@nebula-sdk/core": "workspace:*",
+		"@nebula-sdk/dashboard": "workspace:*"
+	},
+	"peerDependencies": {
+		"express": "^4.21.0 || ^5.0.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.6"
+	}
+}

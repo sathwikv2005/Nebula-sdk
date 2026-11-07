@@ -1,0 +1,25 @@
+{
+	"name": "@nebula-sdk/dashboard",
+	"version": "0.1.0",
+	"description": "Web dashboard for Nebula device management",
+	"license": "MIT",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc --noEmit && vite build",
+		"test": "vitest run --passWithNoTests"
+	},
+	"dependencies": {
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1"
+	},
+	"devDependencies": {
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@vitejs/plugin-react": "^6.2.1",
+		"vite": "^8.3.6"
+	}
+}

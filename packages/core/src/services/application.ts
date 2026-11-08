@@ -57,6 +57,10 @@ export class ApplicationService {
 		return application
 	}
 
+	async getAll(): Promise<Application[]> {
+		return this.config.storage.getApplications()
+	}
+
 	async update(id: string, updates: UpdateApplicationOptions): Promise<Application> {
 		const application = await this.get(id)
 

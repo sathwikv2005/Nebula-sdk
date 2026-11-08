@@ -1,1 +1,3 @@
-export { NEBULA_VERSION } from '@nebula-sdk/core'
+export { Nebula } from './nebula.js'
+
+export type { NebulaOptions } from './types/config.js'

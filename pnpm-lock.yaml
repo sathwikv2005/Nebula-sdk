@@ -54,13 +54,19 @@ importers:
       '@nebula-sdk/dashboard':
         specifier: workspace:*
         version: link:../dashboard
-      express:
-        specifier: ^4.21.0 || ^5.0.0
-        version: 5.3.0
+      '@nebula-sdk/mongoose':
+        specifier: workspace:*
+        version: link:../mongoose
     devDependencies:
       '@types/express':
-        specifier: ^5.0.6
+        specifier: ^5.0.0
         version: 5.0.6
+      express:
+        specifier: ^5.0.0
+        version: 5.3.0
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
 
   packages/mongoose:
     dependencies:

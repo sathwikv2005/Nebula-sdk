@@ -22,12 +22,15 @@
 	},
 	"dependencies": {
 		"@nebula-sdk/core": "workspace:*",
-		"@nebula-sdk/dashboard": "workspace:*"
+		"@nebula-sdk/dashboard": "workspace:*",
+		"@nebula-sdk/mongoose": "workspace:*"
 	},
 	"peerDependencies": {
 		"express": "^4.21.0 || ^5.0.0"
 	},
 	"devDependencies": {
-		"@types/express": "^5.0.6"
+		"@types/express": "^5.0.0",
+		"express": "^5.0.0",
+		"typescript": "^5.9.0"
 	}
 }

@@ -48,11 +48,84 @@ export class MongooseAdapter implements StorageAdapter {
 		await this.models.Application.deleteOne({ id }).exec()
 	}
 
-	async createEnrollmentRequest(request: EnrollmentRequest): Promise<void> {
-		await this.models.Enrollment.create({
-			...request,
-			expiresAt: new Date(request.expiresAt),
-		})
+	async enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean> {
+		const result = await this.models.Application.updateOne(
+			{
+				id: applicationId,
+			},
+			{
+				$set: {
+					enrollmentEnabled: true,
+					enrollmentExpiresAt: expiresAt,
+					enrollmentRequestId: null,
+					updatedAt: now,
+				},
+			},
+		).exec()
+
+		return result.matchedCount > 0
+	}
+
+	async disableEnrollment(applicationId: string): Promise<boolean> {
+		const result = await this.models.Application.updateOne(
+			{ id: applicationId },
+			{
+				$set: {
+					enrollmentEnabled: false,
+					enrollmentExpiresAt: null,
+					enrollmentRequestId: null,
+					updatedAt: Date.now(),
+				},
+			},
+		).exec()
+
+		return result.matchedCount > 0
+	}
+
+	async createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean> {
+		const session = await this.models.Application.db.startSession()
+
+		try {
+			const created = await session.withTransaction(async () => {
+				const application = await this.models.Application.findOneAndUpdate(
+					{
+						id: request.applicationId,
+						enrollmentEnabled: true,
+						enrollmentRequestId: null,
+						enrollmentExpiresAt: { $gt: now },
+					},
+					{
+						$set: {
+							enrollmentRequestId: request.id,
+						},
+					},
+					{
+						new: true,
+						session,
+					},
+				).exec()
+
+				if (!application) {
+					return false
+				}
+
+				await this.models.Enrollment.create(
+					[
+						{
+							...request,
+							expiresAt: new Date(request.expiresAt),
+						},
+					],
+					{ session },
+				)
+
+				return true
+			})
+
+			return created ?? false
+		} finally {
+			await session.endSession()
+		}
 	}
 
 	async approveEnrollment(
@@ -64,11 +137,49 @@ export class MongooseAdapter implements StorageAdapter {
 		const session = await this.models.Enrollment.db.startSession()
 
 		try {
-			const result = await session.withTransaction(async (): Promise<Device | null> => {
-				const enrollment = (await this.models.Enrollment.findOneAndUpdate(
+			const device = await session.withTransaction(async (): Promise<Device | null> => {
+				const enrollment = await this.models.Enrollment.findOne({
+					applicationId,
+					codeHash,
+					status: 'pending',
+					expiresAt: { $gt: new Date(now) },
+				})
+					.session(session)
+					.lean<EnrollmentRequest>()
+					.exec()
+
+				if (!enrollment) {
+					return null
+				}
+
+				const application = await this.models.Application.findOneAndUpdate(
 					{
-						applicationId,
-						codeHash,
+						id: applicationId,
+						enrollmentEnabled: true,
+						enrollmentRequestId: enrollment.id,
+						enrollmentExpiresAt: { $gt: now },
+					},
+					{
+						$set: {
+							enrollmentEnabled: false,
+							enrollmentExpiresAt: null,
+							enrollmentRequestId: null,
+							updatedAt: now,
+						},
+					},
+					{
+						new: true,
+						session,
+					},
+				).exec()
+
+				if (!application) {
+					return null
+				}
+
+				const approved = await this.models.Enrollment.findOneAndUpdate(
+					{
+						id: enrollment.id,
 						status: 'pending',
 						expiresAt: { $gt: new Date(now) },
 					},
@@ -76,18 +187,12 @@ export class MongooseAdapter implements StorageAdapter {
 						$set: { status: 'approved' },
 					},
 					{
-						new: false,
+						new: true,
 						session,
 					},
-				)
-					.lean()
-					.exec()) as {
-					applicationId: string
-					publicKey: string
-					info: DeviceInfo
-				} | null
+				).exec()
 
-				if (!enrollment) {
+				if (!approved) {
 					return null
 				}
 
@@ -95,7 +200,7 @@ export class MongooseAdapter implements StorageAdapter {
 					[
 						{
 							id: deviceId,
-							applicationId: enrollment.applicationId,
+							applicationId,
 							publicKey: enrollment.publicKey,
 							algorithm: 'Ed25519',
 							info: enrollment.info,
@@ -107,36 +212,18 @@ export class MongooseAdapter implements StorageAdapter {
 					{ session },
 				)
 
-				const device = createdDevice.toObject()
-				delete device._id
-				delete device.__v
+				const result = createdDevice.toObject()
 
-				return device as Device
+				delete result._id
+				delete result.__v
+
+				return result as Device
 			})
 
-			return result ?? null
+			return device ?? null
 		} finally {
 			await session.endSession()
 		}
-	}
-
-	async rejectEnrollment(applicationId: string, codeHash: string, now: number): Promise<boolean> {
-		const result = await this.models.Enrollment.findOneAndUpdate(
-			{
-				applicationId,
-				codeHash,
-				status: 'pending',
-				expiresAt: { $gt: new Date(now) },
-			},
-			{
-				$set: { status: 'rejected' },
-			},
-			{
-				new: true,
-			},
-		).exec()
-
-		return result !== null
 	}
 
 	async getDevice(id: string): Promise<Device | null> {

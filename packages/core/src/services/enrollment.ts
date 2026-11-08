@@ -3,28 +3,59 @@ import { randomUUID } from 'node:crypto'
 import type { NebulaConfig } from '../types/config.js'
 import type { DeviceInfo, Device } from '../types/device.js'
 
-import { EnrollmentError } from '../errors/index.js'
+import { EnrollmentError, ConfigurationError } from '../errors/index.js'
 
-import { generateEnrollmentCode, hash } from '../crypto/hash.js'
-
+import { hash } from '../crypto/hash.js'
 import { validatePublicKey } from '../crypto/keys.js'
 
 export interface CreateEnrollmentOptions {
 	applicationId: string
+	code: string
 	publicKey: string
 	info?: DeviceInfo
 }
 
-export interface EnrollmentResult {
-	id: string
-	code: string
+export interface EnrollmentWindow {
+	applicationId: string
 	expiresAt: number
 }
 
 export class EnrollmentService {
 	constructor(private readonly config: NebulaConfig) {}
 
-	async create(options: CreateEnrollmentOptions): Promise<EnrollmentResult> {
+	async enable(applicationId: string): Promise<EnrollmentWindow> {
+		const application = await this.config.storage.getApplication(applicationId)
+
+		if (!application) {
+			throw new EnrollmentError('Application not found')
+		}
+
+		const now = Date.now()
+		const expiresAt = now + this.config.enrollmentCodeTtlMs
+
+		const enabled = await this.config.storage.enableEnrollment(applicationId, expiresAt, now)
+
+		if (!enabled) {
+			throw new EnrollmentError('Could not enable enrollment')
+		}
+
+		return {
+			applicationId,
+			expiresAt,
+		}
+	}
+
+	async disable(applicationId: string): Promise<void> {
+		const application = await this.config.storage.getApplication(applicationId)
+
+		if (!application) {
+			throw new EnrollmentError('Application not found')
+		}
+
+		await this.config.storage.disableEnrollment(applicationId)
+	}
+
+	async request(options: CreateEnrollmentOptions): Promise<void> {
 		const application = await this.config.storage.getApplication(options.applicationId)
 
 		if (!application) {
@@ -35,36 +66,35 @@ export class EnrollmentService {
 			throw new EnrollmentError('Device enrollment is disabled')
 		}
 
-		if (!options.publicKey) {
-			throw new EnrollmentError('Device public key is required')
+		if (!application.enrollmentExpiresAt || application.enrollmentExpiresAt <= Date.now()) {
+			throw new EnrollmentError('Enrollment window has expired')
 		}
+
+		this.validateCode(options.code)
 
 		if (!validatePublicKey(options.publicKey)) {
 			throw new EnrollmentError('Invalid Ed25519 public key')
 		}
 
-		const code = generateEnrollmentCode(this.config.enrollmentCodeLength)
-
 		const now = Date.now()
-		const expiresAt = now + this.config.enrollmentCodeTtlMs
 
 		const request = {
 			id: randomUUID(),
 			applicationId: options.applicationId,
-			codeHash: hash(`${options.applicationId}:${code}`, this.config.secret),
+			codeHash: hash(`${options.applicationId}:${options.code}`, this.config.secret),
 			publicKey: options.publicKey,
 			info: options.info ?? {},
 			status: 'pending' as const,
 			createdAt: now,
-			expiresAt,
+			expiresAt: application.enrollmentExpiresAt,
 		}
 
-		await this.config.storage.createEnrollmentRequest(request)
+		const created = await this.config.storage.createEnrollmentRequest(request, now)
 
-		return {
-			id: request.id,
-			code,
-			expiresAt,
+		if (!created) {
+			throw new EnrollmentError(
+				'Enrollment window is unavailable or another device has already requested enrollment',
+			)
 		}
 	}
 
@@ -85,18 +115,6 @@ export class EnrollmentService {
 		}
 
 		return device
-	}
-
-	async reject(applicationId: string, code: string): Promise<void> {
-		this.validateCode(code)
-
-		const codeHash = hash(`${applicationId}:${code}`, this.config.secret)
-
-		const rejected = await this.config.storage.rejectEnrollment(applicationId, codeHash, Date.now())
-
-		if (!rejected) {
-			throw new EnrollmentError('Enrollment request not found, expired, or already processed')
-		}
 	}
 
 	private validateCode(code: string): void {

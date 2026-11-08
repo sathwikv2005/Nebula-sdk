@@ -10,7 +10,11 @@ export interface StorageAdapter {
 	updateApplication(id: string, updates: Partial<Application>): Promise<void>
 	deleteApplication(id: string): Promise<void>
 
-	createEnrollmentRequest(request: EnrollmentRequest): Promise<void>
+	enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean>
+
+	disableEnrollment(applicationId: string): Promise<boolean>
+
+	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean>
 
 	approveEnrollment(
 		applicationId: string,
@@ -18,8 +22,6 @@ export interface StorageAdapter {
 		deviceId: string,
 		now: number,
 	): Promise<Device | null>
-
-	rejectEnrollment(applicationId: string, codeHash: string, now: number): Promise<boolean>
 
 	getDevice(id: string): Promise<Device | null>
 	getDevices(applicationId: string): Promise<Device[]>

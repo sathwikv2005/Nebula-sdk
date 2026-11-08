@@ -1,12 +1,14 @@
 import type { Connection } from 'mongoose'
 
-import type { StorageAdapter } from '@nebula-sdk/core'
+import type {
+	Application,
+	Device,
+	DeviceInfo,
+	EnrollmentRequest,
+	StorageAdapter,
+} from '@nebula-sdk/core'
 
-import type { Application } from '@nebula-sdk/core'
-import type { Device } from '@nebula-sdk/core'
-import type { EnrollmentRequest } from '@nebula-sdk/core'
-
-import { createNebulaModels } from './models'
+import { createNebulaModels } from './models.js'
 
 export class MongooseAdapter implements StorageAdapter {
 	private models: ReturnType<typeof createNebulaModels>
@@ -28,9 +30,7 @@ export class MongooseAdapter implements StorageAdapter {
 	}
 
 	async getApplication(id: string): Promise<Application | null> {
-		const application = await this.models.Application.findOne({ id }).lean().exec()
-
-		return application as Application | null
+		return this.models.Application.findOne({ id }).select({ _id: 0 }).lean<Application>().exec()
 	}
 
 	async updateApplication(id: string, updates: Partial<Application>): Promise<void> {
@@ -63,11 +63,9 @@ export class MongooseAdapter implements StorageAdapter {
 	): Promise<Device | null> {
 		const session = await this.models.Enrollment.db.startSession()
 
-		let approvedDevice: Device | null = null
-
 		try {
-			await session.withTransaction(async () => {
-				const enrollment = await this.models.Enrollment.findOneAndUpdate(
+			const result = await session.withTransaction(async (): Promise<Device | null> => {
+				const enrollment = (await this.models.Enrollment.findOneAndUpdate(
 					{
 						applicationId,
 						codeHash,
@@ -83,33 +81,43 @@ export class MongooseAdapter implements StorageAdapter {
 					},
 				)
 					.lean()
-					.exec()
+					.exec()) as {
+					applicationId: string
+					publicKey: string
+					info: DeviceInfo
+				} | null
 
 				if (!enrollment) {
-					approvedDevice = null
-					return
+					return null
 				}
 
-				const device = {
-					id: deviceId,
-					applicationId: enrollment.applicationId,
-					publicKey: enrollment.publicKey,
-					algorithm: 'Ed25519' as const,
-					info: enrollment.info,
-					status: 'active' as const,
-					createdAt: now,
-					lastAuthenticatedAt: null,
-				}
+				const [createdDevice] = await this.models.Device.create(
+					[
+						{
+							id: deviceId,
+							applicationId: enrollment.applicationId,
+							publicKey: enrollment.publicKey,
+							algorithm: 'Ed25519',
+							info: enrollment.info,
+							status: 'active',
+							createdAt: now,
+							lastAuthenticatedAt: null,
+						},
+					],
+					{ session },
+				)
 
-				const [createdDevice] = await this.models.Device.create([device], { session })
+				const device = createdDevice.toObject()
+				delete device._id
+				delete device.__v
 
-				approvedDevice = createdDevice.toObject() as Device
+				return device as Device
 			})
+
+			return result ?? null
 		} finally {
 			await session.endSession()
 		}
-
-		return approvedDevice
 	}
 
 	async rejectEnrollment(applicationId: string, codeHash: string, now: number): Promise<boolean> {
@@ -132,18 +140,15 @@ export class MongooseAdapter implements StorageAdapter {
 	}
 
 	async getDevice(id: string): Promise<Device | null> {
-		const device = await this.models.Device.findOne({ id }).lean().exec()
-
-		return device as Device | null
+		return this.models.Device.findOne({ id }).select({ _id: 0 }).lean<Device>().exec()
 	}
 
 	async getDevices(applicationId: string): Promise<Device[]> {
-		const devices = await this.models.Device.find({ applicationId })
+		return this.models.Device.find({ applicationId })
+			.select({ _id: 0 })
 			.sort({ createdAt: -1 })
-			.lean()
+			.lean<Device[]>()
 			.exec()
-
-		return devices as Device[]
 	}
 
 	async updateDevice(id: string, updates: Partial<Device>): Promise<void> {

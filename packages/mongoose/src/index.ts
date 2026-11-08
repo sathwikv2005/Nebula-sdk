@@ -1,7 +1,7 @@
-export { MongooseAdapter } from './adapter'
+export { MongooseAdapter } from './adapter.js'
 
-export { createNebulaModels, initializeNebulaModels } from './models'
+export { createNebulaModels, initializeNebulaModels } from './models.js'
 
-export { applicationSchema } from './schemas/application'
-export { deviceSchema } from './schemas/device'
-export { enrollmentSchema } from './schemas/enrollment'
+export { applicationSchema } from './schemas/application.js'
+export { deviceSchema } from './schemas/device.js'
+export { enrollmentSchema } from './schemas/enrollment.js'

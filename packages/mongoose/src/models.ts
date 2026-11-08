@@ -1,8 +1,8 @@
 import type { Connection } from 'mongoose'
 
-import { applicationSchema } from './schemas/application'
-import { deviceSchema } from './schemas/device'
-import { enrollmentSchema } from './schemas/enrollment'
+import { applicationSchema } from './schemas/application.js'
+import { deviceSchema } from './schemas/device.js'
+import { enrollmentSchema } from './schemas/enrollment.js'
 
 export function createNebulaModels(connection: Connection) {
 	return {

@@ -14,7 +14,16 @@ export const applicationSchema = new Schema(
 		},
 		enrollmentEnabled: {
 			type: Boolean,
-			default: true,
+			default: false,
+			required: true,
+		},
+		enrollmentExpiresAt: {
+			type: Number,
+			default: null,
+		},
+		enrollmentRequestId: {
+			type: String,
+			default: null,
 		},
 		createdAt: {
 			type: Number,

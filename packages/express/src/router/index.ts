@@ -3,6 +3,7 @@ import type { Nebula as CoreNebula } from '@nebula-sdk/core'
 import type { ErrorRequestHandler, RequestHandler } from 'express'
 
 import { createApplicationRouter } from './applications.js'
+import { defaultErrorHandler } from '../middleware/error-handler.js'
 
 export function createNebulaRouter(
 	core: CoreNebula,
@@ -15,9 +16,7 @@ export function createNebulaRouter(
 
 	router.use('/applications', adminAuth, createApplicationRouter(core))
 
-	if (errorHandler) {
-		router.use(errorHandler)
-	}
+	router.use(errorHandler ?? defaultErrorHandler)
 
 	return router
 }

@@ -5,6 +5,7 @@ import { Nebula as CoreNebula } from '@nebula-sdk/core'
 import { MongooseAdapter } from '@nebula-sdk/mongoose'
 
 import type { NebulaOptions } from './types/config.js'
+import { createNebulaRouter } from './router/index.js'
 
 export class Nebula {
 	private readonly core: CoreNebula
@@ -26,7 +27,7 @@ export class Nebula {
 			storage,
 		})
 
-		this.routerInstance = express.Router()
+		this.routerInstance = createNebulaRouter(this.core)
 	}
 
 	async initialize(): Promise<void> {

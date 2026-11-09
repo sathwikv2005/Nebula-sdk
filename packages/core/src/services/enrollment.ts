@@ -6,7 +6,8 @@ import type { DeviceInfo, Device } from '../types/device.js'
 import { EnrollmentError, ConfigurationError } from '../errors/index.js'
 
 import { hash } from '../crypto/hash.js'
-import { validatePublicKey } from '../crypto/keys.js'
+import { normalizePublicKey, validatePublicKey } from '../crypto/keys.js'
+import { EnrollmentRequest } from '../types/enrollment.js'
 
 export interface CreateEnrollmentOptions {
 	applicationId: string
@@ -76,15 +77,17 @@ export class EnrollmentService {
 			throw new EnrollmentError('Invalid Ed25519 public key')
 		}
 
+		const publicKey = normalizePublicKey(options.publicKey)
+
 		const now = Date.now()
 
-		const request = {
+		const request: EnrollmentRequest = {
 			id: randomUUID(),
 			applicationId: options.applicationId,
 			codeHash: hash(`${options.applicationId}:${options.code}`, this.config.secret),
-			publicKey: options.publicKey,
+			publicKey,
 			info: options.info ?? {},
-			status: 'pending' as const,
+			status: 'pending',
 			createdAt: now,
 			expiresAt: application.enrollmentExpiresAt,
 		}

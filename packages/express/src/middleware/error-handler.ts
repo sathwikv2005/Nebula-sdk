@@ -26,6 +26,7 @@ export const defaultErrorHandler: ErrorRequestHandler = (error, _req, res, _next
 	}
 
 	// Unexpected errors
+	console.error(error)
 	return res.status(500).json({
 		success: false,
 		error: {

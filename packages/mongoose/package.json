@@ -2,27 +2,29 @@
 	"name": "@nebula-sdk/mongoose",
 	"version": "0.1.0",
 	"type": "module",
-	"main": "./dist/index.js",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		}
 	},
 	"files": [
 		"dist"
 	],
 	"scripts": {
-		"build": "tsc -p tsconfig.json"
+		"build": "tsup src/index.ts --format esm,cjs --dts --clean"
 	},
 	"dependencies": {
 		"@nebula-sdk/core": "workspace:*"
 	},
 	"peerDependencies": {
-		"mongoose": "^8.0.0"
+		"mongoose": "^8.0.0 || ^9.0.0"
 	},
 	"devDependencies": {
-		"mongoose": "^8.0.0"
+		"mongoose": "^9.0.0"
 	}
 }

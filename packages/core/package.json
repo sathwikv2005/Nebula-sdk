@@ -4,20 +4,22 @@
 	"description": "Core device authentication and management engine for Nebula",
 	"license": "MIT",
 	"type": "module",
-	"main": "./dist/index.js",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		}
 	},
 	"files": [
 		"dist"
 	],
 	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts --clean",
-		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"build": "tsup src/index.ts --format esm,cjs --dts --clean",
+		"dev": "tsup src/index.ts --format esm,cjs --dts --watch",
 		"test": "vitest run"
 	},
 	"devDependencies": {

@@ -1,8 +1,20 @@
-import type { Connection } from 'mongoose'
+import type { Connection, ConnectOptions } from 'mongoose'
 import type { Nebula as CoreNebula } from '@nebula-sdk/core'
 
 type CoreOptions = ConstructorParameters<typeof CoreNebula>[0]
 
-export type NebulaOptions = Omit<CoreOptions, 'storage'> & {
-	database: Connection
-}
+type NebulaBaseOptions = Omit<CoreOptions, 'storage'>
+
+export type NebulaOptions = NebulaBaseOptions &
+	(
+		| {
+				connection: Connection
+				uri?: never
+				mongooseOptions?: never
+		  }
+		| {
+				uri: string
+				connection?: never
+				mongooseOptions?: ConnectOptions
+		  }
+	)

@@ -33,6 +33,14 @@ export class MongooseAdapter implements StorageAdapter {
 		return this.models.Application.findOne({ id }).select({ _id: 0 }).lean<Application>().exec()
 	}
 
+	async getApplications(): Promise<Application[]> {
+		return this.models.Application.find()
+			.select({ _id: 0 })
+			.sort({ createdAt: -1 })
+			.lean<Application[]>()
+			.exec()
+	}
+
 	async updateApplication(id: string, updates: Partial<Application>): Promise<void> {
 		const safeUpdates = { ...updates }
 		delete safeUpdates.id

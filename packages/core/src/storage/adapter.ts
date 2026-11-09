@@ -7,6 +7,7 @@ export interface StorageAdapter {
 
 	createApplication(application: Application): Promise<void>
 	getApplication(id: string): Promise<Application | null>
+	getApplications(): Promise<Application[]>
 	updateApplication(id: string, updates: Partial<Application>): Promise<void>
 	deleteApplication(id: string): Promise<void>
 

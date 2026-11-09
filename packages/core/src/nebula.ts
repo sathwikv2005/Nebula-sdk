@@ -2,10 +2,12 @@ import type { NebulaConfig, NebulaOptions } from './types/config.js'
 
 import { ConfigurationError } from './errors/index.js'
 import { EnrollmentService } from './services/enrollment.js'
+import { ApplicationService } from './services/application.js'
 
 export class Nebula {
 	public readonly config: NebulaConfig
 	public readonly enrollment: EnrollmentService
+	public readonly application: ApplicationService
 
 	constructor(options: NebulaOptions) {
 		if (!options.storage) {
@@ -42,6 +44,7 @@ export class Nebula {
 		}
 
 		this.enrollment = new EnrollmentService(this.config)
+		this.application = new ApplicationService(this.config)
 	}
 
 	async initialize(): Promise<void> {

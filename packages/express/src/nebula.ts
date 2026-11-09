@@ -14,7 +14,7 @@ export class Nebula {
 	private readonly routerInstance: Router
 
 	constructor(options: NebulaOptions) {
-		const { connection, uri, mongooseOptions, ...config } = options
+		const { connection, uri, mongooseOptions, adminAuth, errorHandler, ...config } = options
 
 		this.ownsConnection = !connection
 
@@ -27,7 +27,7 @@ export class Nebula {
 			storage,
 		})
 
-		this.routerInstance = createNebulaRouter(this.core)
+		this.routerInstance = createNebulaRouter(this.core, adminAuth, errorHandler)
 	}
 
 	async initialize(): Promise<void> {

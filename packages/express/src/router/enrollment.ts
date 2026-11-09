@@ -1,8 +1,23 @@
 import { Router } from 'express'
 import type { Request, Response, RequestHandler } from 'express'
+import rateLimit from 'express-rate-limit'
 import type { Nebula as CoreNebula } from '@nebula-sdk/core'
 
 import { asyncHandler } from '../utils/async-handler.js'
+
+const enrollmentLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	limit: 5,
+	standardHeaders: 'draft-8',
+	legacyHeaders: false,
+	message: {
+		success: false,
+		error: {
+			code: 'TOO_MANY_REQUESTS',
+			message: 'Too many enrollment attempts. Please try again later.',
+		},
+	},
+})
 
 function getApplicationId(req: Request, res: Response): string | null {
 	const id = req.params.applicationId
@@ -27,6 +42,7 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 	// Public: a new device requests enrollment.
 	router.post(
 		'/enrollment/request',
+		enrollmentLimiter,
 		asyncHandler(async (req, res) => {
 			const { applicationId, code, publicKey, info } = req.body ?? {}
 

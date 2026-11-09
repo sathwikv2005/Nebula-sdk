@@ -23,7 +23,8 @@
 	"dependencies": {
 		"@nebula-sdk/core": "workspace:*",
 		"@nebula-sdk/dashboard": "workspace:*",
-		"@nebula-sdk/mongoose": "workspace:*"
+		"@nebula-sdk/mongoose": "workspace:*",
+		"express-rate-limit": "^8.7.3"
 	},
 	"peerDependencies": {
 		"express": "^4.21.0 || ^5.0.0",

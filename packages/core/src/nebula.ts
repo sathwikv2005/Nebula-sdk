@@ -6,7 +6,7 @@ import { ApplicationService } from './services/application.js'
 import { SessionService } from './services/session.js'
 
 export class Nebula {
-	public readonly config: NebulaConfig
+	private readonly config: NebulaConfig
 	public readonly enrollment: EnrollmentService
 	public readonly application: ApplicationService
 	public readonly session: SessionService

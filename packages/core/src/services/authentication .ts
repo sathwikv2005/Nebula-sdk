@@ -12,9 +12,6 @@ import { NebulaConfig } from '../types/config.js'
 import { verifySignature } from '../crypto/keys.js'
 import { Session } from '../types/session.js'
 
-const CHALLENGE_TTL = 60 * 1000
-const SESSION_TTL = 15 * 60 * 1000
-
 export class AuthenticationError extends NebulaError {
 	constructor(message: string) {
 		super(message, 'AUTHENTICATION_ERROR')
@@ -72,7 +69,7 @@ export class AuthenticationService {
 			deviceId: device.id,
 			applicationId: device.applicationId,
 			challengeHash,
-			expiresAt: now + CHALLENGE_TTL,
+			expiresAt: now + this.config.challengeTtlMs,
 		}
 
 		await this.config.storage.addChallenge(toSave)
@@ -115,7 +112,11 @@ export class AuthenticationService {
 			throw new AuthenticationError('Invalid signature.')
 		}
 
-		const sessionToken = await this.createSession(deviceId, device.applicationId, SESSION_TTL)
+		const sessionToken = await this.createSession(
+			deviceId,
+			device.applicationId,
+			this.config.sessionTtlMs,
+		)
 		return sessionToken
 	}
 }

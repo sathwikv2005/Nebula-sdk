@@ -22,6 +22,8 @@ export const sessionSchema = new Schema(
 		tokenHash: {
 			type: String,
 			required: true,
+			unique: true,
+			immutable: true,
 		},
 		expiresAt: {
 			type: Date,

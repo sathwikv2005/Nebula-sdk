@@ -1,11 +1,16 @@
 import { randomUUID } from 'node:crypto'
-import { generateChallenge, hash, verifyHash } from '../crypto/hash.js'
+import {
+	generateChallenge,
+	generateSessionToken,
+	hash,
+	hashSessionToken,
+	verifyHash,
+} from '../crypto/hash.js'
 import { NebulaError } from '../errors/base.js'
 import { Challenge } from '../types/challenge.js'
 import { NebulaConfig } from '../types/config.js'
 import { verifySignature } from '../crypto/keys.js'
-
-const CHALLENGE_TTL = 60 * 1000
+import { Session } from '../types/session.js'
 
 export class AuthenticationError extends NebulaError {
 	constructor(message: string) {
@@ -15,6 +20,38 @@ export class AuthenticationError extends NebulaError {
 
 export class AuthenticationService {
 	constructor(private readonly config: NebulaConfig) {}
+
+	private async createSession(
+		deviceId: string,
+		applicationId: string,
+		ttl: number,
+	): Promise<string> {
+		const device = await this.config.storage.getDevice(deviceId)
+
+		if (!device || device.status !== 'active' || device.applicationId !== applicationId) {
+			throw new AuthenticationError('Invalid device.')
+		}
+
+		if (!Number.isSafeInteger(ttl) || ttl <= 0) {
+			throw new AuthenticationError('Invalid session TTL.')
+		}
+
+		const token = generateSessionToken()
+		const now = Date.now()
+
+		const toSave: Session = {
+			id: randomUUID(),
+			tokenHash: hashSessionToken(token),
+			deviceId,
+			applicationId,
+			createdAt: now,
+			expiresAt: now + ttl,
+		}
+
+		await this.config.storage.addSession(toSave)
+
+		return token
+	}
 
 	async generateChallenge(deviceId: string): Promise<string> {
 		const device = await this.config.storage.getDevice(deviceId)
@@ -32,7 +69,7 @@ export class AuthenticationService {
 			deviceId: device.id,
 			applicationId: device.applicationId,
 			challengeHash,
-			expiresAt: now + CHALLENGE_TTL,
+			expiresAt: now + this.config.challengeTtlMs,
 		}
 
 		await this.config.storage.addChallenge(toSave)
@@ -40,7 +77,7 @@ export class AuthenticationService {
 		return challenge
 	}
 
-	async verifyChallenge(deviceId: string, challenge: string, signature: string): Promise<void> {
+	async verifyChallenge(deviceId: string, challenge: string, signature: string): Promise<string> {
 		const device = await this.config.storage.getDevice(deviceId)
 
 		if (!device || device.status !== 'active') {
@@ -75,6 +112,11 @@ export class AuthenticationService {
 			throw new AuthenticationError('Invalid signature.')
 		}
 
-		//TODO: authentication succeeded.
+		const sessionToken = await this.createSession(
+			deviceId,
+			device.applicationId,
+			this.config.sessionTtlMs,
+		)
+		return sessionToken
 	}
 }

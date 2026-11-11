@@ -6,6 +6,7 @@ export interface NebulaOptions {
 	enrollmentCodeLength?: number
 	enrollmentCodeTtlMs?: number
 	challengeTtlMs?: number
+	sessionTtlMs?: number
 }
 
 export interface NebulaConfig {
@@ -14,4 +15,5 @@ export interface NebulaConfig {
 	enrollmentCodeLength: number
 	enrollmentCodeTtlMs: number
 	challengeTtlMs: number
+	sessionTtlMs: number
 }

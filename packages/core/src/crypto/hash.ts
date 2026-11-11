@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
 
 export function hash(value: string, secret: string): string {
 	return createHmac('sha256', secret).update(value).digest('hex')
@@ -25,4 +25,12 @@ export function generateEnrollmentCode(length: number): string {
 
 export function generateChallenge(): string {
 	return randomBytes(32).toString('base64url')
+}
+
+export function generateSessionToken(): string {
+	return randomBytes(32).toString('base64url')
+}
+
+export function hashSessionToken(token: string): string {
+	return createHash('sha256').update(token).digest('hex')
 }

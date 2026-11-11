@@ -1,5 +1,5 @@
 import { AuthenticationError } from '../errors/index.js'
-import { createPublicKey, type KeyObject } from 'node:crypto'
+import { createPublicKey, verify, type KeyObject } from 'node:crypto'
 
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
 
@@ -73,4 +73,22 @@ export function normalizePublicKey(publicKey: string): string {
 			type: 'spki',
 		})
 		.toString('base64')
+}
+
+export function verifySignature(publicKey: string, message: string, signature: string): boolean {
+	try {
+		const key = createPublicKey({
+			key: Buffer.from(publicKey, 'base64'),
+			format: 'der',
+			type: 'spki',
+		})
+
+		if (key.asymmetricKeyType !== 'ed25519') {
+			return false
+		}
+
+		return verify(null, Buffer.from(message, 'utf8'), key, Buffer.from(signature, 'base64'))
+	} catch {
+		return false
+	}
 }

@@ -1,263 +1,84 @@
 import type { Connection } from 'mongoose'
 
-import type {
-	Application,
-	Device,
-	DeviceInfo,
-	EnrollmentRequest,
-	StorageAdapter,
-} from '@nebula-sdk/core'
+import type { Application, Device, EnrollmentRequest, StorageAdapter } from '@nebula-sdk/core'
 
-import { createNebulaModels } from './models.js'
+import { initializeNebulaModels, createNebulaModels } from './models.js'
+
+import { ApplicationAdapter } from './adapters/application.adapter.js'
+import { DeviceAdapter } from './adapters/device.adapter.js'
+import { EnrollmentAdapter } from './adapters/enrollment.adapter.js'
 
 export class MongooseAdapter implements StorageAdapter {
-	private models: ReturnType<typeof createNebulaModels>
+	private readonly application: ApplicationAdapter
+	private readonly device: DeviceAdapter
+	private readonly enrollment: EnrollmentAdapter
 
-	constructor(connection: Connection) {
-		this.models = createNebulaModels(connection)
+	constructor(private readonly connection: Connection) {
+		const models = createNebulaModels(connection)
+
+		this.application = new ApplicationAdapter(models)
+		this.device = new DeviceAdapter(models)
+		this.enrollment = new EnrollmentAdapter(models)
 	}
 
 	async initialize(): Promise<void> {
-		await Promise.all([
-			this.models.Application.createIndexes(),
-			this.models.Device.createIndexes(),
-			this.models.Enrollment.createIndexes(),
-		])
+		await initializeNebulaModels(this.connection)
 	}
 
-	async createApplication(application: Application): Promise<void> {
-		await this.models.Application.create(application)
+	createApplication(application: Application): Promise<void> {
+		return this.application.createApplication(application)
 	}
 
-	async getApplication(id: string): Promise<Application | null> {
-		return this.models.Application.findOne({ id }).select({ _id: 0 }).lean<Application>().exec()
+	getApplication(id: string): Promise<Application | null> {
+		return this.application.getApplication(id)
 	}
 
-	async getApplications(): Promise<Application[]> {
-		return this.models.Application.find()
-			.select({ _id: 0 })
-			.sort({ createdAt: -1 })
-			.lean<Application[]>()
-			.exec()
+	getApplications(): Promise<Application[]> {
+		return this.application.getApplications()
 	}
 
-	async updateApplication(id: string, updates: Partial<Application>): Promise<void> {
-		const safeUpdates = { ...updates }
-		delete safeUpdates.id
-
-		await this.models.Application.updateOne(
-			{ id },
-			{ $set: safeUpdates },
-			{ runValidators: true },
-		).exec()
+	updateApplication(id: string, updates: Partial<Application>): Promise<void> {
+		return this.application.updateApplication(id, updates)
 	}
 
-	async deleteApplication(id: string): Promise<void> {
-		await this.models.Application.deleteOne({ id }).exec()
+	deleteApplication(id: string): Promise<void> {
+		return this.application.deleteApplication(id)
 	}
 
-	async enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean> {
-		const result = await this.models.Application.updateOne(
-			{
-				id: applicationId,
-			},
-			{
-				$set: {
-					enrollmentEnabled: true,
-					enrollmentExpiresAt: expiresAt,
-					enrollmentRequestId: null,
-					updatedAt: now,
-				},
-			},
-		).exec()
-
-		return result.matchedCount > 0
+	enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean> {
+		return this.application.enableEnrollment(applicationId, expiresAt, now)
 	}
 
-	async disableEnrollment(applicationId: string): Promise<boolean> {
-		const result = await this.models.Application.updateOne(
-			{ id: applicationId },
-			{
-				$set: {
-					enrollmentEnabled: false,
-					enrollmentExpiresAt: null,
-					enrollmentRequestId: null,
-					updatedAt: Date.now(),
-				},
-			},
-		).exec()
-
-		return result.matchedCount > 0
+	disableEnrollment(applicationId: string): Promise<boolean> {
+		return this.application.disableEnrollment(applicationId)
 	}
 
-	async createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean> {
-		const session = await this.models.Application.db.startSession()
-
-		try {
-			const created = await session.withTransaction(async () => {
-				const application = await this.models.Application.findOneAndUpdate(
-					{
-						id: request.applicationId,
-						enrollmentEnabled: true,
-						enrollmentRequestId: null,
-						enrollmentExpiresAt: { $gt: now },
-					},
-					{
-						$set: {
-							enrollmentRequestId: request.id,
-						},
-					},
-					{
-						new: true,
-						session,
-					},
-				).exec()
-
-				if (!application) {
-					return false
-				}
-
-				await this.models.Enrollment.create(
-					[
-						{
-							...request,
-							expiresAt: new Date(request.expiresAt),
-						},
-					],
-					{ session },
-				)
-
-				return true
-			})
-
-			return created ?? false
-		} finally {
-			await session.endSession()
-		}
+	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean> {
+		return this.enrollment.createEnrollmentRequest(request, now)
 	}
 
-	async approveEnrollment(
+	approveEnrollment(
 		applicationId: string,
 		codeHash: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null> {
-		const session = await this.models.Enrollment.db.startSession()
-
-		try {
-			const device = await session.withTransaction(async (): Promise<Device | null> => {
-				const enrollment = await this.models.Enrollment.findOne({
-					applicationId,
-					codeHash,
-					status: 'pending',
-					expiresAt: { $gt: new Date(now) },
-				})
-					.session(session)
-					.lean<EnrollmentRequest>()
-					.exec()
-
-				if (!enrollment) {
-					return null
-				}
-
-				const application = await this.models.Application.findOneAndUpdate(
-					{
-						id: applicationId,
-						enrollmentEnabled: true,
-						enrollmentRequestId: enrollment.id,
-						enrollmentExpiresAt: { $gt: now },
-					},
-					{
-						$set: {
-							enrollmentEnabled: false,
-							enrollmentExpiresAt: null,
-							enrollmentRequestId: null,
-							updatedAt: now,
-						},
-					},
-					{
-						new: true,
-						session,
-					},
-				).exec()
-
-				if (!application) {
-					return null
-				}
-
-				const approved = await this.models.Enrollment.findOneAndUpdate(
-					{
-						id: enrollment.id,
-						status: 'pending',
-						expiresAt: { $gt: new Date(now) },
-					},
-					{
-						$set: { status: 'approved' },
-					},
-					{
-						new: true,
-						session,
-					},
-				).exec()
-
-				if (!approved) {
-					return null
-				}
-
-				const [createdDevice] = await this.models.Device.create(
-					[
-						{
-							id: deviceId,
-							applicationId,
-							publicKey: enrollment.publicKey,
-							algorithm: 'Ed25519',
-							info: enrollment.info,
-							status: 'active',
-							createdAt: now,
-							lastAuthenticatedAt: null,
-						},
-					],
-					{ session },
-				)
-
-				const result = createdDevice.toObject()
-
-				delete result._id
-				delete result.__v
-
-				return result as Device
-			})
-
-			return device ?? null
-		} finally {
-			await session.endSession()
-		}
+		return this.enrollment.approveEnrollment(applicationId, codeHash, deviceId, now)
 	}
 
-	async getDevice(id: string): Promise<Device | null> {
-		return this.models.Device.findOne({ id }).select({ _id: 0 }).lean<Device>().exec()
+	getDevice(id: string): Promise<Device | null> {
+		return this.device.getDevice(id)
 	}
 
-	async getDevices(applicationId: string): Promise<Device[]> {
-		return this.models.Device.find({ applicationId })
-			.select({ _id: 0 })
-			.sort({ createdAt: -1 })
-			.lean<Device[]>()
-			.exec()
+	getDevices(applicationId: string): Promise<Device[]> {
+		return this.device.getDevices(applicationId)
 	}
 
-	async updateDevice(id: string, updates: Partial<Device>): Promise<void> {
-		const safeUpdates = { ...updates }
-		delete safeUpdates.id
-
-		await this.models.Device.updateOne(
-			{ id },
-			{ $set: safeUpdates },
-			{ runValidators: true },
-		).exec()
+	updateDevice(id: string, updates: Partial<Device>): Promise<void> {
+		return this.device.updateDevice(id, updates)
 	}
 
-	async deleteDevice(id: string): Promise<void> {
-		await this.models.Device.deleteOne({ id }).exec()
+	deleteDevice(id: string): Promise<void> {
+		return this.device.deleteDevice(id)
 	}
 }

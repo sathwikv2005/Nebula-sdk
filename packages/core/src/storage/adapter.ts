@@ -1,3 +1,4 @@
+import { Session } from 'node:inspector'
 import type { Application } from '../types/application.js'
 import { Challenge } from '../types/challenge.js'
 import type { Device } from '../types/device.js'
@@ -13,11 +14,9 @@ export interface StorageAdapter {
 	deleteApplication(id: string): Promise<void>
 
 	enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean>
-
 	disableEnrollment(applicationId: string): Promise<boolean>
 
 	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean>
-
 	approveEnrollment(
 		applicationId: string,
 		codeHash: string,
@@ -29,8 +28,14 @@ export interface StorageAdapter {
 	getDevices(applicationId: string): Promise<Device[]>
 	updateDevice(id: string, updates: Partial<Device>): Promise<void>
 	deleteDevice(id: string): Promise<void>
+
 	getChallenge(deviceId: string): Promise<Challenge | null>
 	addChallenge(challenge: Challenge): Promise<void>
 	consumeChallenge(deviceId: string, challengeHash: string, now: number): Promise<Challenge | null>
 	deleteChallenge(deviceId: string): Promise<void>
+
+	addSession(session: Session): Promise<void>
+	getSession(tokenHash: string): Promise<Session | null>
+	revokeSession(sessionId: string): Promise<boolean>
+	revokeDeviceSessions(deviceId: string): Promise<number>
 }

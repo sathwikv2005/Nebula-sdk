@@ -6,6 +6,7 @@ import type {
 	Device,
 	EnrollmentRequest,
 	StorageAdapter,
+	Session,
 } from '@nebula-sdk/core'
 
 import { initializeNebulaModels, createNebulaModels } from './models.js'
@@ -14,12 +15,14 @@ import { ApplicationAdapter } from './adapters/application.adapter.js'
 import { DeviceAdapter } from './adapters/device.adapter.js'
 import { EnrollmentAdapter } from './adapters/enrollment.adapter.js'
 import { ChallengesAdapter } from './adapters/challenges.adapter.js'
+import { SessionAdapter } from './adapters/session.adapter.js'
 
 export class MongooseAdapter implements StorageAdapter {
 	private readonly application: ApplicationAdapter
 	private readonly device: DeviceAdapter
 	private readonly enrollment: EnrollmentAdapter
 	private readonly challenges: ChallengesAdapter
+	private readonly session: SessionAdapter
 
 	constructor(private readonly connection: Connection) {
 		const models = createNebulaModels(connection)
@@ -28,6 +31,7 @@ export class MongooseAdapter implements StorageAdapter {
 		this.device = new DeviceAdapter(models)
 		this.enrollment = new EnrollmentAdapter(models)
 		this.challenges = new ChallengesAdapter(models)
+		this.session = new SessionAdapter(models)
 	}
 
 	async initialize(): Promise<void> {
@@ -109,5 +113,21 @@ export class MongooseAdapter implements StorageAdapter {
 
 	deleteChallenge(deviceId: string): Promise<void> {
 		return this.challenges.deleteChallenge(deviceId)
+	}
+
+	addSession(session: Session): Promise<void> {
+		return this.session.addSession(session)
+	}
+
+	getSession(tokenHash: string): Promise<Session | null> {
+		return this.session.getSession(tokenHash)
+	}
+
+	revokeSession(sessionId: string): Promise<boolean> {
+		return this.session.revokeSession(sessionId)
+	}
+
+	revokeDeviceSessions(deviceId: string): Promise<number> {
+		return this.session.revokeDeviceSessions(deviceId)
 	}
 }

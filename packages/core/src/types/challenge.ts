@@ -4,5 +4,5 @@ export interface Challenge {
 	applicationId: string
 	challengeHash: string
 	expiresAt: number
-	consumedAt: number
+	consumedAt?: number
 }

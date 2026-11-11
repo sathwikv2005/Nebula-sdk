@@ -1,17 +1,25 @@
 import type { Connection } from 'mongoose'
 
-import type { Application, Device, EnrollmentRequest, StorageAdapter } from '@nebula-sdk/core'
+import type {
+	Application,
+	Challenge,
+	Device,
+	EnrollmentRequest,
+	StorageAdapter,
+} from '@nebula-sdk/core'
 
 import { initializeNebulaModels, createNebulaModels } from './models.js'
 
 import { ApplicationAdapter } from './adapters/application.adapter.js'
 import { DeviceAdapter } from './adapters/device.adapter.js'
 import { EnrollmentAdapter } from './adapters/enrollment.adapter.js'
+import { ChallengesAdapter } from './adapters/challenges.adapter.js'
 
 export class MongooseAdapter implements StorageAdapter {
 	private readonly application: ApplicationAdapter
 	private readonly device: DeviceAdapter
 	private readonly enrollment: EnrollmentAdapter
+	private readonly challenges: ChallengesAdapter
 
 	constructor(private readonly connection: Connection) {
 		const models = createNebulaModels(connection)
@@ -19,6 +27,7 @@ export class MongooseAdapter implements StorageAdapter {
 		this.application = new ApplicationAdapter(models)
 		this.device = new DeviceAdapter(models)
 		this.enrollment = new EnrollmentAdapter(models)
+		this.challenges = new ChallengesAdapter(models)
 	}
 
 	async initialize(): Promise<void> {
@@ -80,5 +89,25 @@ export class MongooseAdapter implements StorageAdapter {
 
 	deleteDevice(id: string): Promise<void> {
 		return this.device.deleteDevice(id)
+	}
+
+	getChallenge(deviceId: string): Promise<Challenge | null> {
+		return this.challenges.getChallenge(deviceId)
+	}
+
+	addChallenge(challenge: Challenge): Promise<void> {
+		return this.challenges.addChallenge(challenge)
+	}
+
+	consumeChallenge(
+		deviceId: string,
+		challengeHash: string,
+		now: number,
+	): Promise<Challenge | null> {
+		return this.challenges.consumeChallenge(deviceId, challengeHash, now)
+	}
+
+	deleteChallenge(deviceId: string): Promise<void> {
+		return this.challenges.deleteChallenge(deviceId)
 	}
 }

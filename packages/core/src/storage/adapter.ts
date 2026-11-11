@@ -1,8 +1,8 @@
-import { Session } from 'node:inspector'
 import type { Application } from '../types/application.js'
 import { Challenge } from '../types/challenge.js'
 import type { Device } from '../types/device.js'
 import type { EnrollmentRequest } from '../types/enrollment.js'
+import { Session } from '../types/session.js'
 
 export interface StorageAdapter {
 	initialize?(): Promise<void>

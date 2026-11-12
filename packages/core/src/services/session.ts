@@ -1,13 +1,7 @@
 import { hashSessionToken } from '../crypto/hash.js'
-import { NebulaError } from '../errors/base.js'
+import { SessionError } from '../errors/session.js'
 import { NebulaConfig } from '../types/config.js'
 import { Session } from '../types/session.js'
-
-export class SessionError extends NebulaError {
-	constructor(message: string) {
-		super(message, 'SESSION_ERROR')
-	}
-}
 
 export class SessionService {
 	constructor(private readonly config: NebulaConfig) {}

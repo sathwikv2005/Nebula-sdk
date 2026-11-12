@@ -3,13 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { Application } from '../types/application.js'
 import type { NebulaConfig } from '../types/config.js'
 
-import { NebulaError } from '../errors/index.js'
-
-export class ApplicationError extends NebulaError {
-	constructor(message: string) {
-		super(message, 'APPLICATION_ERROR')
-	}
-}
+import { ApplicationError } from '../errors/application.js'
 
 export interface CreateApplicationOptions {
 	name: string

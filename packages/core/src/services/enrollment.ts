@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { NebulaConfig } from '../types/config.js'
 import type { DeviceInfo, Device } from '../types/device.js'
 
-import { EnrollmentError, ConfigurationError } from '../errors/index.js'
+import { EnrollmentError } from '../errors/index.js'
 
 import { hash } from '../crypto/hash.js'
 import { normalizePublicKey, validatePublicKey } from '../crypto/keys.js'

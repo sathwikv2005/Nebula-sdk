@@ -13,5 +13,7 @@ export type { Challenge } from './types/challenge.js'
 
 export type { Session } from './types/session.js'
 
+export type { StorageAdapter } from './storage/adapter.ts'
+
 // Public errors
 export * from './errors/index.js'

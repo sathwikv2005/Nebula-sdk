@@ -4,6 +4,7 @@ import { ConfigurationError } from './errors/index.js'
 import { EnrollmentService } from './services/enrollment.js'
 import { ApplicationService } from './services/application.js'
 import { SessionService } from './services/session.js'
+import { AuthenticationService } from './services/authentication .js'
 
 const DEFAULT_ENROLLMENT_CODE_LENGTH = 6
 const DEFAULT_ENROLLMENT_CODE_TTL = 300_000
@@ -21,6 +22,7 @@ export class Nebula {
 	public readonly enrollment: EnrollmentService
 	public readonly application: ApplicationService
 	public readonly session: SessionService
+	public readonly authentication: AuthenticationService
 
 	constructor(options: NebulaOptions) {
 		if (!options || typeof options !== 'object') {
@@ -67,6 +69,7 @@ export class Nebula {
 		this.enrollment = new EnrollmentService(this.config)
 		this.application = new ApplicationService(this.config)
 		this.session = new SessionService(this.config)
+		this.authentication = new AuthenticationService(this.config)
 	}
 
 	async initialize(): Promise<void> {

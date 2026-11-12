@@ -17,12 +17,6 @@ export const deviceSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		algorithm: {
-			type: String,
-			enum: ['Ed25519'],
-			required: true,
-			default: 'Ed25519',
-		},
 		info: {
 			type: Schema.Types.Mixed,
 			default: {},

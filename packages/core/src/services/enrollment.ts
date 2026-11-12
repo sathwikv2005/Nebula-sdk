@@ -74,7 +74,7 @@ export class EnrollmentService {
 		this.validateCode(options.code)
 
 		if (!validatePublicKey(options.publicKey)) {
-			throw new EnrollmentError('Invalid Ed25519 public key')
+			throw new EnrollmentError('Invalid public key')
 		}
 
 		const publicKey = normalizePublicKey(options.publicKey)

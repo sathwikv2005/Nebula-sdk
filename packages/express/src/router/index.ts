@@ -5,6 +5,7 @@ import type { ErrorRequestHandler, RequestHandler } from 'express'
 import { createApplicationRouter } from './applications.js'
 import { createEnrollmentRouter } from './enrollment.js'
 import { defaultErrorHandler } from '../middleware/error-handler.js'
+import { createAuthRouter } from './auth.js'
 
 export function createNebulaRouter(
 	core: CoreNebula,
@@ -15,6 +16,7 @@ export function createNebulaRouter(
 
 	router.use(express.json())
 
+	router.use('/auth', createAuthRouter(core))
 	router.use('/applications', adminAuth, createApplicationRouter(core))
 	router.use(createEnrollmentRouter(core, adminAuth))
 

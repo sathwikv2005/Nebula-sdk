@@ -14,7 +14,19 @@ export class Nebula {
 	private readonly routerInstance: Router
 
 	constructor(options: NebulaOptions) {
-		const { connection, uri, mongooseOptions, adminAuth, errorHandler, ...config } = options
+		const {
+			connection,
+			uri,
+			mongooseOptions,
+			adminAuth,
+			errorHandler,
+			enableDeviceAuthOnAllRoutes,
+			...config
+		} = options
+
+		if (!connection && !uri) {
+			throw new Error('Either a MongoDB connection or URI must be provided.')
+		}
 
 		this.ownsConnection = !connection
 
@@ -27,7 +39,12 @@ export class Nebula {
 			storage,
 		})
 
-		this.routerInstance = createNebulaRouter(this.core, adminAuth, errorHandler)
+		this.routerInstance = createNebulaRouter(
+			this.core,
+			adminAuth,
+			errorHandler,
+			enableDeviceAuthOnAllRoutes,
+		)
 	}
 
 	async initialize(): Promise<void> {

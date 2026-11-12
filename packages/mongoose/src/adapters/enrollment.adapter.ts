@@ -127,7 +127,6 @@ export class EnrollmentAdapter {
 							id: deviceId,
 							applicationId,
 							publicKey: enrollment.publicKey,
-							algorithm: 'Ed25519',
 							info: enrollment.info,
 							status: 'active',
 							createdAt: now,

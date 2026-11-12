@@ -13,7 +13,6 @@ export interface Device {
 	id: string
 	applicationId: string
 	publicKey: string
-	algorithm: 'Ed25519'
 	info: DeviceInfo
 	status: DeviceStatus
 	createdAt: number

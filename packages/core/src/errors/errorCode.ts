@@ -1,0 +1,11 @@
+export const NebulaErrorCode = {
+	CONFIGURATION: 'CONFIGURATION_ERROR',
+	APPLICATION: 'APPLICATION_ERROR',
+	AUTHENTICATION: 'AUTHENTICATION_ERROR',
+	DEVICE: 'DEVICE_ERROR',
+	ENROLLMENT: 'ENROLLMENT_ERROR',
+	VALIDATION: 'VALIDATION_ERROR',
+	SESSION: 'SESSION_ERROR',
+} as const
+
+export type NebulaErrorCodeType = (typeof NebulaErrorCode)[keyof typeof NebulaErrorCode]

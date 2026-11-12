@@ -6,18 +6,11 @@ import {
 	hashSessionToken,
 	verifyHash,
 } from '../crypto/hash.js'
-import { NebulaError } from '../errors/base.js'
 import { Challenge } from '../types/challenge.js'
 import { NebulaConfig } from '../types/config.js'
 import { verifySignature } from '../crypto/keys.js'
 import { Session } from '../types/session.js'
-
-export class AuthenticationError extends NebulaError {
-	constructor(message: string) {
-		super(message, 'AUTHENTICATION_ERROR')
-	}
-}
-
+import { AuthenticationError } from '../errors/authentication.js'
 export class AuthenticationService {
 	constructor(private readonly config: NebulaConfig) {}
 

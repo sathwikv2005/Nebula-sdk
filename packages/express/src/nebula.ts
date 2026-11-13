@@ -66,6 +66,7 @@ export class Nebula {
 		return this.routerInstance
 	}
 
+	// Creates middleware to authenticate requests using device sessions
 	authDevice(): RequestHandler {
 		return createAuthDeviceMiddleware((token) => this.core.session.validateSession(token))
 	}

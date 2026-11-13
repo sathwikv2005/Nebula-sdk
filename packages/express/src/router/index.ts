@@ -6,6 +6,7 @@ import { createApplicationRouter } from './applications.js'
 import { createEnrollmentRouter } from './enrollment.js'
 import { defaultErrorHandler } from '../middleware/error-handler.js'
 import { createAuthRouter } from './auth.js'
+import { createAuthDeviceMiddleware } from '../api/authDevice.js'
 
 const ROUTE_PREFIX = '/_nebula'
 
@@ -28,7 +29,7 @@ export function createNebulaRouter(
 
 	// Application-wide device authentication
 	if (enableDeviceAuthOnAllRoutes) {
-		// router.use(authDevice)
+		router.use(createAuthDeviceMiddleware((token) => core.session.validateSession(token)))
 	}
 
 	router.use(errorHandler ?? defaultErrorHandler)

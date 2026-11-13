@@ -1,4 +1,4 @@
-import express, { type Router } from 'express'
+import { RequestHandler, type Router } from 'express'
 import { createConnection, type Connection } from 'mongoose'
 
 import { Nebula as CoreNebula } from '@nebula-sdk/core'
@@ -6,6 +6,7 @@ import { MongooseAdapter } from '@nebula-sdk/mongoose'
 
 import type { NebulaOptions } from './types/config.js'
 import { createNebulaRouter } from './router/index.js'
+import { createAuthDeviceMiddleware } from './api/authDevice.js'
 
 export class Nebula {
 	private readonly core: CoreNebula
@@ -63,5 +64,9 @@ export class Nebula {
 
 	router(): Router {
 		return this.routerInstance
+	}
+
+	authDevice(): RequestHandler {
+		return createAuthDeviceMiddleware((token) => this.core.session.validateSession(token))
 	}
 }

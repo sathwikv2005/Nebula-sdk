@@ -19,6 +19,7 @@ export interface NebulaUriOptions {
 export interface NebulaExpressOptions {
 	adminAuth: RequestHandler
 	errorHandler?: ErrorRequestHandler
+	enableDeviceAuthOnAllRoutes?: boolean
 }
 
 export type NebulaOptions = CoreOptions &

@@ -33,6 +33,9 @@ function getExpressStatusCode(error: NebulaExpressError): number {
 		case NebulaExpressErrorCode.NOT_FOUND:
 			return 404
 
+		case NebulaExpressErrorCode.AUTHENTICATION_REQUIRED:
+			return 401
+
 		case NebulaExpressErrorCode.INTERNAL_SERVER_ERROR:
 			return 500
 	}

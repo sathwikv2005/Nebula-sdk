@@ -3,6 +3,7 @@ import type { Session } from '@nebula-sdk/core'
 
 import { NebulaExpressError } from '../errors/expressError.js'
 import { NebulaExpressErrorCode } from '../errors/errorCode.js'
+import { NebulaExpressSession } from '../types/nebulaExpressSession.js'
 
 type SessionValidator = (token: string) => Promise<Session>
 
@@ -20,7 +21,9 @@ export function createAuthDeviceMiddleware(validateSession: SessionValidator): R
 		}
 
 		try {
-			const session = await validateSession(token)
+			const { tokenHash, ...sessionData } = await validateSession(token)
+
+			const session: NebulaExpressSession = sessionData
 
 			req.nebula = { session }
 

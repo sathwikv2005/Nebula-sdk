@@ -7,12 +7,14 @@ import { MongooseAdapter } from '@nebula-sdk/mongoose'
 import type { NebulaOptions } from './types/config.js'
 import { createNebulaRouter } from './router/index.js'
 import { createAuthDeviceMiddleware } from './api/authDevice.js'
+import { AdminMongoAdapter } from './storage/mongodb/adapter.js'
 
 export class Nebula {
 	private readonly core: CoreNebula
 	private readonly connection: Connection
 	private readonly ownsConnection: boolean
 	private readonly routerInstance: Router
+	private readonly adminStorage?: AdminMongoAdapter
 
 	constructor(options: NebulaOptions) {
 		const {
@@ -30,7 +32,6 @@ export class Nebula {
 		}
 
 		this.ownsConnection = !connection
-
 		this.connection = connection ?? createConnection(uri!, mongooseOptions)
 
 		const storage = new MongooseAdapter(this.connection)
@@ -40,9 +41,18 @@ export class Nebula {
 			storage,
 		})
 
+		// Initialize built-in admin storage only when custom auth isn't provided.
+		let resolvedAdminAuth = adminAuth
+
+		if (!resolvedAdminAuth) {
+			this.adminStorage = new AdminMongoAdapter(this.connection)
+			//TODO: Built-in admin authentication middleware will be wired here.
+			// resolvedAdminAuth = createAdminAuthMiddleware(...)
+		}
+
 		this.routerInstance = createNebulaRouter(
 			this.core,
-			adminAuth,
+			resolvedAdminAuth,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
 		)
@@ -66,7 +76,6 @@ export class Nebula {
 		return this.routerInstance
 	}
 
-	// Creates middleware to authenticate requests using device sessions
 	authDevice(): RequestHandler {
 		return createAuthDeviceMiddleware((token) => this.core.session.validateSession(token))
 	}

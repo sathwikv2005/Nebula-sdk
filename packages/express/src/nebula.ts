@@ -22,6 +22,7 @@ export class Nebula {
 			connection,
 			uri,
 			mongooseOptions,
+			admin,
 			adminAuth,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
@@ -30,6 +31,10 @@ export class Nebula {
 
 		if (!connection && !uri) {
 			throw new Error('Either a MongoDB connection or URI must be provided.')
+		}
+
+		if (!admin && !adminAuth) {
+			throw new Error('Either admin credentials or adminAuth middleware must be provided.')
 		}
 
 		this.ownsConnection = !connection
@@ -42,17 +47,17 @@ export class Nebula {
 			storage,
 		})
 
-		// Initialize built-in admin storage only when custom auth isn't provided.
 		let resolvedAdminAuth = adminAuth
 
-		if (!resolvedAdminAuth) {
+		if (admin) {
 			this.adminStorage = new AdminMongoAdapter(this.connection)
 			resolvedAdminAuth = createAdminAuthMiddleware(this.adminStorage)
+			//TODO: initialize admin
 		}
 
 		this.routerInstance = createNebulaRouter(
 			this.core,
-			resolvedAdminAuth,
+			resolvedAdminAuth!,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
 		)
@@ -65,7 +70,10 @@ export class Nebula {
 			}
 
 			await this.core.initialize()
-			await this.adminStorage?.initialize()
+
+			if (this.adminStorage) {
+				await this.adminStorage.initialize()
+			}
 		} catch (error) {
 			if (this.ownsConnection) {
 				await this.connection.close()

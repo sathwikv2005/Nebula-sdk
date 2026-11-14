@@ -14,6 +14,10 @@ export class AdminMongoAdapter implements AdminStorageAdapter {
 		this.AdminSession = connection.model<AdminSession>('NebulaAdminSession', adminSessionSchema)
 	}
 
+	async initialize(): Promise<void> {
+		await Promise.all([this.Admin.createIndexes(), this.AdminSession.createIndexes()])
+	}
+
 	async createAdmin(admin: Admin): Promise<void> {
 		await this.Admin.create(admin)
 	}

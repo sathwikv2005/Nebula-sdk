@@ -2,6 +2,8 @@ import type { Admin } from './mongodb/models/admin.js'
 import type { AdminSession } from './mongodb/models/adminSession.js'
 
 export interface AdminStorageAdapter {
+	initialize(): Promise<void>
+
 	// Admin operations
 	createAdmin(admin: Admin): Promise<void>
 	findAdminByUsername(username: string): Promise<Admin | null>

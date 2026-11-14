@@ -8,6 +8,7 @@ import type { NebulaOptions } from './types/config.js'
 import { createNebulaRouter } from './router/index.js'
 import { createAuthDeviceMiddleware } from './api/authDevice.js'
 import { AdminMongoAdapter } from './storage/mongodb/adapter.js'
+import { createAdminAuthMiddleware } from './middleware/adminAuth.js'
 
 export class Nebula {
 	private readonly core: CoreNebula
@@ -46,8 +47,7 @@ export class Nebula {
 
 		if (!resolvedAdminAuth) {
 			this.adminStorage = new AdminMongoAdapter(this.connection)
-			//TODO: Built-in admin authentication middleware will be wired here.
-			// resolvedAdminAuth = createAdminAuthMiddleware(...)
+			resolvedAdminAuth = createAdminAuthMiddleware(this.adminStorage)
 		}
 
 		this.routerInstance = createNebulaRouter(
@@ -59,11 +59,20 @@ export class Nebula {
 	}
 
 	async initialize(): Promise<void> {
-		if (this.ownsConnection) {
-			await this.connection.asPromise()
-		}
+		try {
+			if (this.ownsConnection) {
+				await this.connection.asPromise()
+			}
 
-		await this.core.initialize()
+			await this.core.initialize()
+			await this.adminStorage?.initialize()
+		} catch (error) {
+			if (this.ownsConnection) {
+				await this.connection.close()
+			}
+
+			throw error
+		}
 	}
 
 	async close(): Promise<void> {

@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit'
 import type { Nebula as CoreNebula } from '@nebula-sdk/core'
 
 import { asyncHandler } from '../utils/async-handler.js'
+import { parseDeviceInfo } from '../utils/parseDeviceInfo.js'
 
 const enrollmentLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -50,7 +51,7 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 				applicationId,
 				code,
 				publicKey,
-				info,
+				info: parseDeviceInfo(info),
 			})
 
 			res.status(202).json({

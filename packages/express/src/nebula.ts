@@ -7,18 +7,22 @@ import { MongooseAdapter } from '@nebula-sdk/mongoose'
 import type { NebulaOptions } from './types/config.js'
 import { createNebulaRouter } from './router/index.js'
 import { createAuthDeviceMiddleware } from './api/authDevice.js'
+import { AdminMongoAdapter } from './storage/mongodb/adapter.js'
+import { createAdminAuthMiddleware } from './middleware/adminAuth.js'
 
 export class Nebula {
 	private readonly core: CoreNebula
 	private readonly connection: Connection
 	private readonly ownsConnection: boolean
 	private readonly routerInstance: Router
+	private readonly adminStorage?: AdminMongoAdapter
 
 	constructor(options: NebulaOptions) {
 		const {
 			connection,
 			uri,
 			mongooseOptions,
+			admin,
 			adminAuth,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
@@ -29,8 +33,11 @@ export class Nebula {
 			throw new Error('Either a MongoDB connection or URI must be provided.')
 		}
 
-		this.ownsConnection = !connection
+		if (!admin && !adminAuth) {
+			throw new Error('Either admin credentials or adminAuth middleware must be provided.')
+		}
 
+		this.ownsConnection = !connection
 		this.connection = connection ?? createConnection(uri!, mongooseOptions)
 
 		const storage = new MongooseAdapter(this.connection)
@@ -40,20 +47,40 @@ export class Nebula {
 			storage,
 		})
 
+		let resolvedAdminAuth = adminAuth
+
+		if (admin) {
+			this.adminStorage = new AdminMongoAdapter(this.connection)
+			resolvedAdminAuth = createAdminAuthMiddleware(this.adminStorage)
+			//TODO: initialize admin
+		}
+
 		this.routerInstance = createNebulaRouter(
 			this.core,
-			adminAuth,
+			resolvedAdminAuth!,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
 		)
 	}
 
 	async initialize(): Promise<void> {
-		if (this.ownsConnection) {
-			await this.connection.asPromise()
-		}
+		try {
+			if (this.ownsConnection) {
+				await this.connection.asPromise()
+			}
 
-		await this.core.initialize()
+			await this.core.initialize()
+
+			if (this.adminStorage) {
+				await this.adminStorage.initialize()
+			}
+		} catch (error) {
+			if (this.ownsConnection) {
+				await this.connection.close()
+			}
+
+			throw error
+		}
 	}
 
 	async close(): Promise<void> {

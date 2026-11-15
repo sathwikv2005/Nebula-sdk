@@ -3,15 +3,22 @@ import type { Connection, Model } from 'mongoose'
 import type { AdminStorageAdapter } from '../adapter.js'
 import { adminSchema, type Admin } from './models/admin.js'
 import { adminSessionSchema, type AdminSession } from './models/adminSession.js'
+import { AdminCredentials } from '../../types/config.js'
+import { hashPassword } from '../../utils/hash.js'
+import { randomUUID } from 'node:crypto'
 
 export class AdminMongoAdapter implements AdminStorageAdapter {
 	private readonly Admin: Model<Admin>
 	private readonly AdminSession: Model<AdminSession>
 
 	constructor(connection: Connection) {
-		this.Admin = connection.model<Admin>('NebulaAdmin', adminSchema)
+		this.Admin = connection.model<Admin>('Nebula_Admin', adminSchema, 'nebula_admins')
 
-		this.AdminSession = connection.model<AdminSession>('NebulaAdminSession', adminSessionSchema)
+		this.AdminSession = connection.model<AdminSession>(
+			'Nebula_Admin_Session',
+			adminSessionSchema,
+			'nebula_admin_session',
+		)
 	}
 
 	async initialize(): Promise<void> {
@@ -64,5 +71,26 @@ export class AdminMongoAdapter implements AdminStorageAdapter {
 
 	async deleteAdminSessions(adminId: string): Promise<void> {
 		await this.AdminSession.deleteMany({ adminId }).exec()
+	}
+
+	async initializeAdmin(adminCreds: AdminCredentials): Promise<boolean> {
+		const adminCount = await this.Admin.countDocuments()
+
+		if (adminCount > 0) {
+			console.info('[Nebula] An admin account already exists. Skipping initial admin creation.')
+			return false
+		}
+
+		const passwordHash = await hashPassword(adminCreds.password)
+
+		await this.Admin.create({
+			id: randomUUID(),
+			username: adminCreds.username,
+			passwordHash,
+		})
+
+		console.info('[Nebula] Initial admin account created successfully.')
+
+		return true
 	}
 }

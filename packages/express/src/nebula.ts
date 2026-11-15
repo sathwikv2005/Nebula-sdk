@@ -4,7 +4,7 @@ import { createConnection, type Connection } from 'mongoose'
 import { Nebula as CoreNebula } from '@nebula-sdk/core'
 import { MongooseAdapter } from '@nebula-sdk/mongoose'
 
-import type { NebulaOptions } from './types/config.js'
+import type { AdminCredentials, NebulaOptions } from './types/config.js'
 import { createNebulaRouter } from './router/index.js'
 import { createAuthDeviceMiddleware } from './api/authDevice.js'
 import { AdminMongoAdapter } from './storage/mongodb/adapter.js'
@@ -16,6 +16,7 @@ export class Nebula {
 	private readonly ownsConnection: boolean
 	private readonly routerInstance: Router
 	private readonly adminStorage?: AdminMongoAdapter
+	private adminCredentials?: AdminCredentials
 
 	constructor(options: NebulaOptions) {
 		const {
@@ -37,6 +38,10 @@ export class Nebula {
 			throw new Error('Either admin credentials or adminAuth middleware must be provided.')
 		}
 
+		if (Boolean(admin) === Boolean(adminAuth)) {
+			throw new Error('Provide either admin credentials or adminAuth middleware, but not both.')
+		}
+
 		this.ownsConnection = !connection
 		this.connection = connection ?? createConnection(uri!, mongooseOptions)
 
@@ -51,13 +56,14 @@ export class Nebula {
 
 		if (admin) {
 			this.adminStorage = new AdminMongoAdapter(this.connection)
+			this.adminCredentials = admin
 			resolvedAdminAuth = createAdminAuthMiddleware(this.adminStorage)
-			//TODO: initialize admin
 		}
 
 		this.routerInstance = createNebulaRouter(
 			this.core,
 			resolvedAdminAuth!,
+			this.adminStorage,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
 		)
@@ -73,6 +79,11 @@ export class Nebula {
 
 			if (this.adminStorage) {
 				await this.adminStorage.initialize()
+
+				if (this.adminCredentials) {
+					const initializedAdmin = await this.adminStorage.initializeAdmin(this.adminCredentials)
+					this.adminCredentials = undefined
+				}
 			}
 		} catch (error) {
 			if (this.ownsConnection) {

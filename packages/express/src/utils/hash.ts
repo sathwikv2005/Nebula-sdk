@@ -1,4 +1,4 @@
-import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
+import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
 
 const KEY_LENGTH = 64
 const SALT_LENGTH = 16
@@ -54,4 +54,12 @@ export function verifyPassword(password: string, storedHash: string): Promise<bo
 			},
 		)
 	})
+}
+
+export function hashToken(token: string): string {
+	return createHash('sha256').update(token).digest('hex')
+}
+
+export function generateSessionToken(): string {
+	return randomBytes(32).toString('base64url')
 }

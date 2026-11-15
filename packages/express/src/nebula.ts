@@ -63,6 +63,7 @@ export class Nebula {
 		this.routerInstance = createNebulaRouter(
 			this.core,
 			resolvedAdminAuth!,
+			this.adminStorage,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
 		)

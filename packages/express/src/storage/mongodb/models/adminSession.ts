@@ -5,8 +5,8 @@ export interface AdminSession {
 	adminId: string
 	tokenHash: string
 	expiresAt: Date
-	createdAt: Date
-	updatedAt: Date
+	createdAt?: Date
+	updatedAt?: Date
 }
 
 export const adminSessionSchema = new Schema<AdminSession>(

@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto'
 import type { RequestHandler } from 'express'
 
 import type { AdminStorageAdapter } from '../storage/adapter.js'
 import { NebulaExpressError } from '../errors/expressError.js'
 import { NebulaExpressErrorCode } from '../errors/errorCode.js'
+import { hashToken } from '../utils/hash.js'
 
 const COOKIE_NAME = 'nebula_admin_session'
 
@@ -19,9 +19,7 @@ export function createAdminAuthMiddleware(storage: AdminStorageAdapter): Request
 				)
 			}
 
-			const tokenHash = createHash('sha256').update(token).digest('hex')
-
-			const session = await storage.findSessionByTokenHash(tokenHash)
+			const session = await storage.findSessionByTokenHash(hashToken(token))
 
 			if (!session) {
 				throw new NebulaExpressError(
@@ -40,14 +38,15 @@ export function createAdminAuthMiddleware(storage: AdminStorageAdapter): Request
 					NebulaExpressErrorCode.AUTHENTICATION_REQUIRED,
 				)
 			}
+
 			const { passwordHash: _, ...adminContext } = admin
 
 			req.nebula ??= {}
 			req.nebula.admin = adminContext
 
-			next()
+			return next()
 		} catch (error) {
-			next(error)
+			return next(error)
 		}
 	}
 }

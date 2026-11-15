@@ -7,12 +7,15 @@ import { createEnrollmentRouter } from './enrollment.js'
 import { defaultErrorHandler } from '../middleware/error-handler.js'
 import { createAuthRouter } from './auth.js'
 import { createAuthDeviceMiddleware } from '../api/authDevice.js'
+import { AdminMongoAdapter } from '../storage/mongodb/adapter.js'
+import { createAdminRouter } from './admin.js'
 
 const ROUTE_PREFIX = '/_nebula'
 
 export function createNebulaRouter(
 	core: CoreNebula,
 	adminAuth: RequestHandler,
+	adminStorage?: AdminMongoAdapter,
 	errorHandler?: ErrorRequestHandler,
 	enableDeviceAuthOnAllRoutes?: boolean,
 ): Router {
@@ -21,6 +24,7 @@ export function createNebulaRouter(
 
 	nebulaRouter.use(express.json())
 
+	nebulaRouter.use('/admin', createAdminRouter(adminAuth, adminStorage))
 	nebulaRouter.use('/auth', createAuthRouter(core))
 	nebulaRouter.use('/applications', adminAuth, createApplicationRouter(core))
 	nebulaRouter.use('/', createEnrollmentRouter(core, adminAuth))

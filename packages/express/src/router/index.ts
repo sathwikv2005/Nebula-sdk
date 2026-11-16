@@ -9,6 +9,7 @@ import { createAuthRouter } from './auth.js'
 import { createAuthDeviceMiddleware } from '../api/authDevice.js'
 import { AdminMongoAdapter } from '../storage/mongodb/adapter.js'
 import { createAdminRouter } from './admin.js'
+import { createDashboardRouter } from '@nebula-sdk/dashboard'
 
 const ROUTE_PREFIX = '/_nebula'
 
@@ -23,6 +24,9 @@ export function createNebulaRouter(
 	const nebulaRouter = express.Router()
 
 	nebulaRouter.use(express.json())
+
+	//dashboard
+	nebulaRouter.use('/dashboard', createDashboardRouter({ apiRoute: `${ROUTE_PREFIX}/admin` }))
 
 	nebulaRouter.use('/admin', createAdminRouter(adminAuth, adminStorage))
 	nebulaRouter.use('/auth', createAuthRouter(core))

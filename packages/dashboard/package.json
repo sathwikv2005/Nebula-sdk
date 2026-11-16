@@ -7,17 +7,19 @@
 	"files": [
 		"dist"
 	],
-	"main": "./dist/server/index.js",
+	"main": "./dist/server/index.cjs",
+	"module": "./dist/server/index.js",
 	"types": "./dist/server/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/server/index.d.ts",
-			"import": "./dist/server/index.js"
+			"import": "./dist/server/index.js",
+			"require": "./dist/server/index.cjs"
 		}
 	},
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc --noEmit && vite build && tsc -p tsconfig.server.json",
+		"build": "tsc --noEmit && vite build && tsup src/server/index.ts --format esm,cjs --dts --out-dir dist/server",
 		"test": "vitest run --passWithNoTests"
 	},
 	"dependencies": {

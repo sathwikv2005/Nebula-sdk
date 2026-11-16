@@ -1,11 +1,9 @@
 import express, { type Router } from 'express'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 
 import type { DashboardOptions } from './types.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLIENT_PATH = path.resolve(__dirname, '../client')
 
 const defaultDashboardOptions: Required<DashboardOptions> = {

@@ -1,17 +1,9 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router'
+import { createRoot } from 'react-dom/client'
+import App from './App'
 
-function App() {
-	return (
-		<main>
-			<h1>Nebula</h1>
-			<p>Device Authentication Management</p>
-		</main>
-	)
-}
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-	<React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+	<BrowserRouter>
 		<App />
-	</React.StrictMode>,
+	</BrowserRouter>,
 )

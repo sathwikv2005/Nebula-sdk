@@ -26,11 +26,7 @@ export function createNebulaRouter(
 	nebulaRouter.use(express.json())
 
 	//dashboard
-	nebulaRouter.use(
-		'/dashboard',
-		adminAuth,
-		createDashboardRouter({ apiRoute: `${ROUTE_PREFIX}/admin` }),
-	)
+	nebulaRouter.use('/dashboard', adminAuth, createDashboardRouter({ apiRoute: `${ROUTE_PREFIX}` }))
 
 	nebulaRouter.use('/admin', createAdminRouter(adminAuth, adminStorage))
 	nebulaRouter.use('/auth', createAuthRouter(core))

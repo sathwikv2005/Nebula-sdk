@@ -3,10 +3,6 @@ import type { Device } from '../types/device'
 import type { Enrollment } from '../types/enrollment'
 import { nebulaRequest } from './request'
 
-export interface DeviceInfo {
-	[key: string]: unknown
-}
-
 export async function enableEnrollment(applicationId: string): Promise<Enrollment | null> {
 	const res = await nebulaRequest(
 		`/applications/${encodeURIComponent(applicationId)}/enrollment/enable`,

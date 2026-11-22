@@ -1,8 +1,8 @@
 import type { Application } from '../types/application.js'
-import { Challenge } from '../types/challenge.js'
+import type { Challenge } from '../types/challenge.js'
 import type { Device } from '../types/device.js'
 import type { EnrollmentRequest } from '../types/enrollment.js'
-import { Session } from '../types/session.js'
+import type { Session } from '../types/session.js'
 
 export interface StorageAdapter {
 	initialize?(): Promise<void>
@@ -13,13 +13,14 @@ export interface StorageAdapter {
 	updateApplication(id: string, updates: Partial<Application>): Promise<void>
 	deleteApplication(id: string): Promise<void>
 
-	enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean>
-	disableEnrollment(applicationId: string): Promise<boolean>
+	getEnrollmentWindow(): Promise<{ expiresAt: number } | null>
+	enableEnrollment(expiresAt: number, now: number): Promise<boolean>
+	disableEnrollment(): Promise<void>
 
 	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean>
 	approveEnrollment(
+		requestId: string,
 		applicationId: string,
-		codeHash: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null>

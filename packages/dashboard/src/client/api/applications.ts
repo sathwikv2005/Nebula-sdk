@@ -15,7 +15,7 @@ export async function createApplication(
 	if (!res?.ok) return null
 
 	const result: ApiResponse<Application> = await res.json()
-	return result.data
+	return result.data ?? null
 }
 
 export async function getApplications(): Promise<Application[] | null> {
@@ -24,7 +24,7 @@ export async function getApplications(): Promise<Application[] | null> {
 	if (!res?.ok) return null
 
 	const result: ApiResponse<Application[]> = await res.json()
-	return result.data
+	return result.data ?? null
 }
 
 export async function getApplication(id: string): Promise<Application | null> {
@@ -33,7 +33,7 @@ export async function getApplication(id: string): Promise<Application | null> {
 	if (!res?.ok) return null
 
 	const result: ApiResponse<Application> = await res.json()
-	return result.data
+	return result.data ?? null
 }
 
 export async function updateApplication(
@@ -48,7 +48,7 @@ export async function updateApplication(
 	if (!res?.ok) return null
 
 	const result: ApiResponse<Application> = await res.json()
-	return result.data
+	return result.data ?? null
 }
 
 export async function deleteApplication(id: string): Promise<boolean> {

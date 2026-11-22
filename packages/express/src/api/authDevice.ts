@@ -1,11 +1,11 @@
 import type { RequestHandler } from 'express'
-import type { Session } from '@nebula-sdk/core'
+import type { SessionWithDevice } from '@nebula-sdk/core'
 
 import { NebulaExpressError } from '../errors/expressError.js'
 import { NebulaExpressErrorCode } from '../errors/errorCode.js'
 import { NebulaExpressSession } from '../types/nebulaExpressSession.js'
 
-type SessionValidator = (token: string) => Promise<Session>
+type SessionValidator = (token: string) => Promise<SessionWithDevice>
 
 export function createAuthDeviceMiddleware(validateSession: SessionValidator): RequestHandler {
 	return async (req, _res, next) => {
@@ -21,11 +21,11 @@ export function createAuthDeviceMiddleware(validateSession: SessionValidator): R
 		}
 
 		try {
-			const { tokenHash, ...sessionData } = await validateSession(token)
+			const { ...sessionData } = await validateSession(token)
 
-			const session: NebulaExpressSession = sessionData
+			const session: NebulaExpressSession = sessionData.session
 
-			req.nebula = { session }
+			req.nebula = { session, device: sessionData.device }
 
 			next()
 		} catch (error) {

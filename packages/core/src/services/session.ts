@@ -1,12 +1,12 @@
 import { hashSessionToken } from '../crypto/hash.js'
 import { SessionError } from '../errors/session.js'
 import { NebulaConfig } from '../types/config.js'
-import { Session } from '../types/session.js'
+import { Session, SessionWithDevice } from '../types/session.js'
 
 export class SessionService {
 	constructor(private readonly config: NebulaConfig) {}
 
-	async validateSession(token: string): Promise<Session> {
+	async validateSession(token: string): Promise<SessionWithDevice> {
 		const tokenHash = hashSessionToken(token)
 		const session = await this.config.storage.getSession(tokenHash)
 
@@ -19,8 +19,8 @@ export class SessionService {
 		if (!device || device.status !== 'active' || device.applicationId !== session.applicationId) {
 			throw new SessionError('Invalid session.')
 		}
-
-		return session
+		const { tokenHash: _, ...publicSession } = session
+		return { session: publicSession, device }
 	}
 
 	async revokeSession(token: string): Promise<void> {

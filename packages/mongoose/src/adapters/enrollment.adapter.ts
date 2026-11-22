@@ -7,21 +7,131 @@ type NebulaModels = ReturnType<typeof createNebulaModels>
 export class EnrollmentAdapter {
 	constructor(private readonly models: NebulaModels) {}
 
+	async getEnrollmentWindow(): Promise<{ expiresAt: number } | null> {
+		const state = await this.models.EnrollmentState.findOne({
+			id: 'global',
+			expiresAt: { $gt: new Date() },
+		})
+			.lean()
+			.exec()
+
+		if (!state?.expiresAt) {
+			return null
+		}
+
+		return {
+			expiresAt: new Date(state.expiresAt).getTime(),
+		}
+	}
+
+	async enableEnrollment(expiresAt: number, now: number): Promise<boolean> {
+		const session = await this.models.EnrollmentState.db.startSession()
+
+		try {
+			const enabled = await session.withTransaction(async () => {
+				const previousState = await this.models.EnrollmentState.findOne({
+					id: 'global',
+				})
+					.session(session)
+					.lean()
+					.exec()
+
+				// Reject any previous pending request.
+				if (previousState?.requestId) {
+					await this.models.Enrollment.updateOne(
+						{
+							id: previousState.requestId,
+							status: 'pending',
+						},
+						{
+							$set: { status: 'rejected' },
+						},
+						{ session },
+					).exec()
+				}
+
+				await this.models.EnrollmentState.findOneAndUpdate(
+					{ id: 'global' },
+					{
+						$set: {
+							expiresAt: new Date(expiresAt),
+							enabledAt: now,
+							requestId: null,
+						},
+					},
+					{
+						upsert: true,
+						new: true,
+						session,
+					},
+				).exec()
+
+				return true
+			})
+
+			return enabled ?? false
+		} finally {
+			await session.endSession()
+		}
+	}
+
+	async disableEnrollment(): Promise<void> {
+		const session = await this.models.EnrollmentState.db.startSession()
+
+		try {
+			await session.withTransaction(async () => {
+				const state = await this.models.EnrollmentState.findOne({
+					id: 'global',
+				})
+					.session(session)
+					.lean()
+					.exec()
+
+				if (state?.requestId) {
+					await this.models.Enrollment.updateOne(
+						{
+							id: state.requestId,
+							status: 'pending',
+						},
+						{
+							$set: { status: 'rejected' },
+						},
+						{ session },
+					).exec()
+				}
+
+				await this.models.EnrollmentState.updateOne(
+					{ id: 'global' },
+					{
+						$set: {
+							expiresAt: null,
+							enabledAt: null,
+							requestId: null,
+						},
+					},
+					{ session },
+				).exec()
+			})
+		} finally {
+			await session.endSession()
+		}
+	}
+
 	async createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean> {
-		const session = await this.models.Application.db.startSession()
+		const session = await this.models.EnrollmentState.db.startSession()
 
 		try {
 			const created = await session.withTransaction(async () => {
-				const application = await this.models.Application.findOneAndUpdate(
+				// Atomically claim the global enrollment window.
+				const state = await this.models.EnrollmentState.findOneAndUpdate(
 					{
-						id: request.applicationId,
-						enrollmentEnabled: true,
-						enrollmentRequestId: null,
-						enrollmentExpiresAt: { $gt: now },
+						id: 'global',
+						expiresAt: { $gt: new Date(now) },
+						requestId: null,
 					},
 					{
 						$set: {
-							enrollmentRequestId: request.id,
+							requestId: request.id,
 						},
 					},
 					{
@@ -30,7 +140,7 @@ export class EnrollmentAdapter {
 					},
 				).exec()
 
-				if (!application) {
+				if (!state) {
 					return false
 				}
 
@@ -54,8 +164,8 @@ export class EnrollmentAdapter {
 	}
 
 	async approveEnrollment(
+		requestId: string,
 		applicationId: string,
-		codeHash: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null> {
@@ -63,9 +173,36 @@ export class EnrollmentAdapter {
 
 		try {
 			const device = await session.withTransaction(async (): Promise<Device | null> => {
+				// Validate the application first.
+				const application = await this.models.Application.findOne({
+					id: applicationId,
+				})
+					.session(session)
+					.select('id')
+					.lean()
+					.exec()
+
+				if (!application) {
+					return null
+				}
+
+				// Verify that this request owns the active enrollment window.
+				const state = await this.models.EnrollmentState.findOne({
+					id: 'global',
+					requestId,
+					expiresAt: { $gt: new Date(now) },
+				})
+					.session(session)
+					.lean()
+					.exec()
+
+				if (!state) {
+					return null
+				}
+
+				// Verify the enrollment request.
 				const enrollment = await this.models.Enrollment.findOne({
-					applicationId,
-					codeHash,
+					id: requestId,
 					status: 'pending',
 					expiresAt: { $gt: new Date(now) },
 				})
@@ -77,19 +214,18 @@ export class EnrollmentAdapter {
 					return null
 				}
 
-				const application = await this.models.Application.findOneAndUpdate(
+				// Atomically close the enrollment window.
+				const closed = await this.models.EnrollmentState.findOneAndUpdate(
 					{
-						id: applicationId,
-						enrollmentEnabled: true,
-						enrollmentRequestId: enrollment.id,
-						enrollmentExpiresAt: { $gt: now },
+						id: 'global',
+						requestId,
+						expiresAt: { $gt: new Date(now) },
 					},
 					{
 						$set: {
-							enrollmentEnabled: false,
-							enrollmentExpiresAt: null,
-							enrollmentRequestId: null,
-							updatedAt: now,
+							expiresAt: null,
+							enabledAt: null,
+							requestId: null,
 						},
 					},
 					{
@@ -98,18 +234,21 @@ export class EnrollmentAdapter {
 					},
 				).exec()
 
-				if (!application) {
-					return null
+				if (!closed) {
+					throw new Error('ENROLLMENT_STATE_CHANGED')
 				}
 
+				// Mark the enrollment request as approved.
 				const approved = await this.models.Enrollment.findOneAndUpdate(
 					{
-						id: enrollment.id,
+						id: requestId,
 						status: 'pending',
 						expiresAt: { $gt: new Date(now) },
 					},
 					{
-						$set: { status: 'approved' },
+						$set: {
+							status: 'approved',
+						},
 					},
 					{
 						new: true,
@@ -118,9 +257,10 @@ export class EnrollmentAdapter {
 				).exec()
 
 				if (!approved) {
-					return null
+					throw new Error('ENROLLMENT_REQUEST_CHANGED')
 				}
 
+				// Create the device under the selected application.
 				const [createdDevice] = await this.models.Device.create(
 					[
 						{
@@ -145,6 +285,16 @@ export class EnrollmentAdapter {
 			})
 
 			return device ?? null
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error.message === 'ENROLLMENT_STATE_CHANGED' ||
+					error.message === 'ENROLLMENT_REQUEST_CHANGED')
+			) {
+				return null
+			}
+
+			throw error
 		} finally {
 			await session.endSession()
 		}

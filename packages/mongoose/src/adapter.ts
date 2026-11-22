@@ -58,12 +58,16 @@ export class MongooseAdapter implements StorageAdapter {
 		return this.application.deleteApplication(id)
 	}
 
-	enableEnrollment(applicationId: string, expiresAt: number, now: number): Promise<boolean> {
-		return this.application.enableEnrollment(applicationId, expiresAt, now)
+	getEnrollmentWindow(): Promise<{ expiresAt: number } | null> {
+		return this.enrollment.getEnrollmentWindow()
 	}
 
-	disableEnrollment(applicationId: string): Promise<boolean> {
-		return this.application.disableEnrollment(applicationId)
+	enableEnrollment(expiresAt: number, now: number): Promise<boolean> {
+		return this.enrollment.enableEnrollment(expiresAt, now)
+	}
+
+	disableEnrollment(): Promise<void> {
+		return this.enrollment.disableEnrollment()
 	}
 
 	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean> {
@@ -71,12 +75,12 @@ export class MongooseAdapter implements StorageAdapter {
 	}
 
 	approveEnrollment(
+		requestId: string,
 		applicationId: string,
-		codeHash: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null> {
-		return this.enrollment.approveEnrollment(applicationId, codeHash, deviceId, now)
+		return this.enrollment.approveEnrollment(requestId, applicationId, deviceId, now)
 	}
 
 	getDevice(id: string): Promise<Device | null> {

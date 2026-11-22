@@ -8,10 +8,6 @@ export const enrollmentSchema = new Schema(
 			unique: true,
 			immutable: true,
 		},
-		applicationId: {
-			type: String,
-			required: true,
-		},
 		codeHash: {
 			type: String,
 			required: true,

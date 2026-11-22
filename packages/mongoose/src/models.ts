@@ -5,6 +5,7 @@ import { deviceSchema } from './schemas/device.js'
 import { enrollmentSchema } from './schemas/enrollment.js'
 import { challengeSchema } from './schemas/challenges.js'
 import { sessionSchema } from './schemas/session.js'
+import { enrollmentStateSchema } from './schemas/enrollmentState.js'
 
 export function createNebulaModels(connection: Connection) {
 	return {
@@ -19,6 +20,9 @@ export function createNebulaModels(connection: Connection) {
 		Challenges:
 			connection.models.NebulaChallenges ?? connection.model('NebulaChallenges', challengeSchema),
 		Session: connection.models.NebulaSession ?? connection.model('NebulaSession', sessionSchema),
+		EnrollmentState:
+			connection.models.NebulaEnrollmentState ??
+			connection.model('NebulaEnrollmentState', enrollmentStateSchema),
 	}
 }
 
@@ -31,6 +35,7 @@ export async function initializeNebulaModels(connection: Connection) {
 		models.Enrollment.createIndexes(),
 		models.Challenges.createIndexes(),
 		models.Session.createIndexes(),
+		models.EnrollmentState.createIndexes(),
 	])
 
 	return models

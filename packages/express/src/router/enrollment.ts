@@ -20,21 +20,19 @@ const enrollmentLimiter = rateLimit({
 	},
 })
 
-function getApplicationId(req: Request, res: Response): string | null {
-	const id = req.params.applicationId
-
-	if (typeof id !== 'string' || !id.trim()) {
+function getString(value: unknown, field: string, res: Response): string | null {
+	if (typeof value !== 'string' || !value.trim()) {
 		res.status(400).json({
 			success: false,
 			error: {
-				code: 'INVALID_APPLICATION_ID',
-				message: 'A valid application ID is required',
+				code: `INVALID_${field.toUpperCase()}`,
+				message: `A valid ${field} is required`,
 			},
 		})
 		return null
 	}
 
-	return id
+	return value.trim()
 }
 
 export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandler): Router {
@@ -45,10 +43,9 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		'/enrollment/request',
 		enrollmentLimiter,
 		asyncHandler(async (req, res) => {
-			const { applicationId, code, publicKey, info } = req.body ?? {}
+			const { code, publicKey, info } = req.body ?? {}
 
 			await core.enrollment.request({
-				applicationId,
 				code,
 				publicKey,
 				info: parseDeviceInfo(info),
@@ -61,15 +58,12 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
-	// Admin: enable device enrollment.
+	// Admin: enable the global enrollment window.
 	router.post(
-		'/applications/:applicationId/enrollment/enable',
+		'/enrollment/enable',
 		adminAuth,
-		asyncHandler(async (req, res) => {
-			const applicationId = getApplicationId(req, res)
-			if (!applicationId) return
-
-			const enrollment = await core.enrollment.enable(applicationId)
+		asyncHandler(async (_req, res) => {
+			const enrollment = await core.enrollment.enable()
 
 			res.status(200).json({
 				success: true,
@@ -78,15 +72,12 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
-	// Admin: disable device enrollment.
+	// Admin: disable the global enrollment window.
 	router.post(
-		'/applications/:applicationId/enrollment/disable',
+		'/enrollment/disable',
 		adminAuth,
-		asyncHandler(async (req, res) => {
-			const applicationId = getApplicationId(req, res)
-			if (!applicationId) return
-
-			await core.enrollment.disable(applicationId)
+		asyncHandler(async (_req, res) => {
+			await core.enrollment.disable()
 
 			res.status(200).json({
 				success: true,
@@ -95,17 +86,18 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
-	// Admin: approve a pending enrollment request.
+	// Admin: approve a pending request and assign it to an application.
 	router.post(
-		'/applications/:applicationId/enrollment/approve',
+		'/enrollment/requests/:requestId/approve',
 		adminAuth,
 		asyncHandler(async (req, res) => {
-			const applicationId = getApplicationId(req, res)
+			const requestId = getString(req.params.requestId, 'requestId', res)
+			if (!requestId) return
+
+			const applicationId = getString(req.body?.applicationId, 'applicationId', res)
 			if (!applicationId) return
 
-			const { code } = req.body ?? {}
-
-			const device = await core.enrollment.approve(applicationId, code)
+			const device = await core.enrollment.approve(requestId, applicationId)
 
 			res.status(201).json({
 				success: true,

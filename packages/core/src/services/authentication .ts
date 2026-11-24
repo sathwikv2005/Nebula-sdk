@@ -105,6 +105,12 @@ export class AuthenticationService {
 			throw new AuthenticationError('Invalid signature.')
 		}
 
+		const now = Date.now()
+
+		await this.config.storage.updateDevice(deviceId, {
+			lastAuthenticatedAt: now,
+		})
+
 		const sessionToken = await this.createSession(
 			deviceId,
 			device.applicationId,

@@ -33,4 +33,12 @@ export class DeviceAdapter {
 	async deleteDevice(id: string): Promise<void> {
 		await this.models.Device.deleteOne({ id }).exec()
 	}
+
+	async getAllDevices(): Promise<Device[]> {
+		return this.models.Device.find({})
+			.select({ _id: 0 })
+			.sort({ createdAt: -1 })
+			.lean<Device[]>()
+			.exec()
+	}
 }

@@ -2,14 +2,7 @@ import { Router } from 'express'
 import type { Nebula as CoreNebula } from '@nebula-sdk/core'
 
 import { asyncHandler } from '../utils/async-handler.js'
-
-function getParam(value: string | string[] | undefined): string {
-	if (typeof value !== 'string') {
-		throw new Error('Invalid route parameter')
-	}
-
-	return value
-}
+import { getParam } from '../utils/getParam.js'
 
 export function createApplicationRouter(core: CoreNebula): Router {
 	const router = Router()

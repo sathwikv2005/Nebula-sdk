@@ -91,6 +91,10 @@ export class MongooseAdapter implements StorageAdapter {
 		return this.device.getDevices(applicationId)
 	}
 
+	getAllDevices(): Promise<Device[]> {
+		return this.device.getAllDevices()
+	}
+
 	updateDevice(id: string, updates: Partial<Device>): Promise<void> {
 		return this.device.updateDevice(id, updates)
 	}

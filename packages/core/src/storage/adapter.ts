@@ -27,6 +27,7 @@ export interface StorageAdapter {
 
 	getDevice(id: string): Promise<Device | null>
 	getDevices(applicationId: string): Promise<Device[]>
+	getAllDevices(): Promise<Device[]>
 	updateDevice(id: string, updates: Partial<Device>): Promise<void>
 	deleteDevice(id: string): Promise<void>
 

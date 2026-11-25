@@ -1,5 +1,5 @@
-import type { ApiResponse } from '../types/apiResponse'
-import type { Application } from '../types/application'
+import type { ApiResponse } from '../../types/apiResponse'
+import type { Application } from '../../types/application'
 import { nebulaRequest } from './request'
 
 const ROUTE = '/applications'

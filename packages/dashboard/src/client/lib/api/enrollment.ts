@@ -1,6 +1,6 @@
-import type { ApiResponse } from '../types/apiResponse'
-import type { Device } from '../types/device'
-import type { Enrollment } from '../types/enrollment'
+import type { ApiResponse } from '../../types/apiResponse'
+import type { Device } from '../../types/device'
+import type { Enrollment } from '../../types/enrollment'
 import { nebulaRequest } from './request'
 
 export async function enableEnrollment(applicationId: string): Promise<Enrollment | null> {

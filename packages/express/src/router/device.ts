@@ -37,7 +37,7 @@ export function createDeviceRouter(core: CoreNebula): Router {
 	router.get(
 		'/application/:applicationId',
 		asyncHandler(async (req, res) => {
-			const devices = await core.device.getDevices(getParam(req.params.id))
+			const devices = await core.device.getDevices(getParam(req.params.applicationId))
 
 			res.json({
 				ok: true,

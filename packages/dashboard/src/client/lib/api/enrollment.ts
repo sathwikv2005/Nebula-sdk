@@ -3,11 +3,10 @@ import type { Device } from '../../types/device'
 import type { Enrollment } from '../../types/enrollment'
 import { nebulaRequest } from './request'
 
-export async function enableEnrollment(applicationId: string): Promise<Enrollment | null> {
-	const res = await nebulaRequest(
-		`/applications/${encodeURIComponent(applicationId)}/enrollment/enable`,
-		{ method: 'POST' },
-	)
+export async function enableEnrollment(): Promise<Enrollment | null> {
+	const res = await nebulaRequest('/enrollment/enable', {
+		method: 'POST',
+	})
 
 	if (!res?.ok) return null
 
@@ -15,26 +14,22 @@ export async function enableEnrollment(applicationId: string): Promise<Enrollmen
 	return result.data ?? null
 }
 
-export async function disableEnrollment(applicationId: string): Promise<boolean> {
-	const res = await nebulaRequest(
-		`/applications/${encodeURIComponent(applicationId)}/enrollment/disable`,
-		{ method: 'POST' },
-	)
+export async function disableEnrollment(): Promise<boolean> {
+	const res = await nebulaRequest('/enrollment/disable', {
+		method: 'POST',
+	})
 
 	return res?.ok ?? false
 }
 
 export async function approveEnrollment(
+	requestId: string,
 	applicationId: string,
-	code: string,
-): Promise<unknown | null> {
-	const res = await nebulaRequest(
-		`/applications/${encodeURIComponent(applicationId)}/enrollment/approve`,
-		{
-			method: 'POST',
-			body: JSON.stringify({ code }),
-		},
-	)
+): Promise<Device | null> {
+	const res = await nebulaRequest(`/enrollment/requests/${encodeURIComponent(requestId)}/approve`, {
+		method: 'POST',
+		body: JSON.stringify({ applicationId }),
+	})
 
 	if (!res?.ok) return null
 

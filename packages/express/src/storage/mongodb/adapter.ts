@@ -74,9 +74,9 @@ export class AdminMongoAdapter implements AdminStorageAdapter {
 	}
 
 	async initializeAdmin(adminCreds: AdminCredentials): Promise<boolean> {
-		const adminCount = await this.Admin.countDocuments()
+		const adminExists = await this.Admin.exists({})
 
-		if (adminCount > 0) {
+		if (adminExists) {
 			console.info('[Nebula] An admin account already exists. Skipping initial admin creation.')
 			return false
 		}

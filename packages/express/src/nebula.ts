@@ -34,11 +34,7 @@ export class Nebula {
 			throw new Error('Either a MongoDB connection or URI must be provided.')
 		}
 
-		if (!admin && !adminAuth) {
-			throw new Error('Either admin credentials or adminAuth middleware must be provided.')
-		}
-
-		if (Boolean(admin) === Boolean(adminAuth)) {
+		if (admin && adminAuth) {
 			throw new Error('Provide either admin credentials or adminAuth middleware, but not both.')
 		}
 
@@ -54,7 +50,7 @@ export class Nebula {
 
 		let resolvedAdminAuth = adminAuth
 
-		if (admin) {
+		if (!resolvedAdminAuth) {
 			this.adminStorage = new AdminMongoAdapter(this.connection)
 			this.adminCredentials = admin
 			resolvedAdminAuth = createAdminAuthMiddleware(this.adminStorage)

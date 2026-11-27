@@ -43,3 +43,9 @@ export async function logout(): Promise<Boolean> {
 
 	return false
 }
+
+export async function checkSession(): Promise<boolean> {
+	const res = await nebulaRequest('/admin/session')
+
+	return res?.status === 200
+}

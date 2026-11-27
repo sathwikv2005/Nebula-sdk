@@ -118,5 +118,10 @@ export function createAdminRouter(
 	// Admin-only routes
 	router.use(adminAuth)
 
+	// Check if the session is valid.
+	router.get('/session', (req, res) => {
+		res.sendStatus(200)
+	})
+
 	return router
 }

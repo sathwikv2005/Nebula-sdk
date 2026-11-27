@@ -2,7 +2,7 @@ import type { ApiResponse } from '../../types/apiResponse'
 import type { Device } from '../../types/device'
 import { nebulaRequest } from './request'
 
-const ROUTE = '/devices'
+const ROUTE = '/device'
 
 export async function getDevices(): Promise<Device[] | null> {
 	const res = await nebulaRequest(ROUTE)

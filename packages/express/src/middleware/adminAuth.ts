@@ -22,6 +22,7 @@ export function createAdminAuthMiddleware(storage: AdminStorageAdapter): Request
 			const session = await storage.findSessionByTokenHash(hashToken(token))
 
 			if (!session) {
+				res.clearCookie(COOKIE_NAME)
 				throw new NebulaExpressError(
 					'Invalid or expired session.',
 					NebulaExpressErrorCode.AUTHENTICATION_REQUIRED,
@@ -32,6 +33,7 @@ export function createAdminAuthMiddleware(storage: AdminStorageAdapter): Request
 
 			if (!admin || admin.disabledAt) {
 				await storage.deleteSession(session.id)
+				res.clearCookie(COOKIE_NAME)
 
 				throw new NebulaExpressError(
 					'Admin account is unavailable.',

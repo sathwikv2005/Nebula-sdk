@@ -17,6 +17,10 @@ export async function nebulaRequest(
 			headers,
 		})
 
+		if (res.status === 401) {
+			window.dispatchEvent(new Event('nebula:unauthorized'))
+		}
+
 		return res
 	} catch (err) {
 		console.error('API request failed:', err)

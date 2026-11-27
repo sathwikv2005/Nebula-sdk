@@ -1,6 +1,6 @@
 import { nebulaRequest } from './request'
 
-export async function login(username: string, password: string): Promise<Boolean> {
+export async function login(username: string, password: string): Promise<boolean> {
 	if (
 		typeof username !== 'string' ||
 		typeof password !== 'string' ||
@@ -30,7 +30,7 @@ export async function login(username: string, password: string): Promise<Boolean
 	return false
 }
 
-export async function logout(): Promise<Boolean> {
+export async function logout(): Promise<boolean> {
 	const res = await nebulaRequest('/admin/logout', {
 		method: 'POST',
 	})

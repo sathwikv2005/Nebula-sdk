@@ -1,11 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router'
 
-import Home from './pages/Home'
+import Home from './pages/home/Home'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
 
 import { useEffect } from 'react'
+import Applications from './pages/applications/Applications'
+import Devices from './pages/devices/Devices'
+import Enrollment from './pages/enrollment/Enrollment'
+import Settings from './pages/settings/Settings'
 
 function AppRoutes() {
 	useEffect(() => {
@@ -18,7 +22,12 @@ function AppRoutes() {
 			<Route path="/login" element={<Login />} />
 
 			<Route element={<ProtectedRoute />}>
-				<Route path="/" element={<Home />} />
+				<Route path="/" element={<Home />}>
+					<Route path="applications" element={<Applications />} />
+					<Route path="devices" element={<Devices />} />
+					<Route path="enrollment" element={<Enrollment />} />
+					<Route path="settings" element={<Settings />} />
+				</Route>
 			</Route>
 
 			<Route path="*" element={<Navigate to="/" replace />} />

@@ -1,4 +1,9 @@
-import type { Device, EnrollmentRequest, EnrollmentRequestResponse } from '@nebula-sdk/core'
+import type {
+	Device,
+	EnrollmentRequest,
+	EnrollmentRequestResponse,
+	EnrollmentWindow,
+} from '@nebula-sdk/core'
 
 import type { createNebulaModels } from '../models.js'
 
@@ -7,7 +12,7 @@ type NebulaModels = ReturnType<typeof createNebulaModels>
 export class EnrollmentAdapter {
 	constructor(private readonly models: NebulaModels) {}
 
-	async getEnrollmentWindow(): Promise<{ expiresAt: number } | null> {
+	async getEnrollmentWindow(): Promise<EnrollmentWindow | null> {
 		const state = await this.models.EnrollmentState.findOne({
 			id: 'global',
 			expiresAt: { $gt: new Date() },

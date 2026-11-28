@@ -13,3 +13,5 @@ export interface EnrollmentRequest {
 }
 
 export type EnrollmentRequestResponse = Omit<EnrollmentRequest, 'codeHash'>
+
+export type EnrollmentWindow = { expiresAt: number }

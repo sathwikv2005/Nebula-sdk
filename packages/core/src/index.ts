@@ -11,6 +11,7 @@ export type {
 	EnrollmentRequest,
 	EnrollmentStatus,
 	EnrollmentRequestResponse,
+	EnrollmentWindow,
 } from './types/enrollment.js'
 
 export type { Challenge } from './types/challenge.js'

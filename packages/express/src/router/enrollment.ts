@@ -86,6 +86,22 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
+	// Admin: get enrollement window
+	router.get(
+		'/enrollment/window',
+		adminAuth,
+		asyncHandler(async (req, res) => {
+			const window = await core.enrollment.enrollmentWindow()
+			return res.json({
+				success: true,
+				data: {
+					enabled: window !== null && Date.now() < window.expiresAt,
+					expiresAt: window?.expiresAt ?? null,
+				},
+			})
+		}),
+	)
+
 	// Admin: get enrollement requests
 	router.get(
 		'/enrollment/requests',

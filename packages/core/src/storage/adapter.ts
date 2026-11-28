@@ -15,7 +15,7 @@ export interface StorageAdapter {
 	deleteApplication(id: string): Promise<void>
 	decrementDeviceCount(applicationId: string): Promise<void>
 
-	getEnrollmentWindow(): Promise<{ expiresAt: number } | null>
+	getEnrollmentWindow(): Promise<EnrollmentWindow | null>
 	enableEnrollment(expiresAt: number, now: number): Promise<boolean>
 	disableEnrollment(): Promise<void>
 

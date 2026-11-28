@@ -26,6 +26,10 @@ export class EnrollmentService {
 		return this.config.storage.getEnrollmentReuests()
 	}
 
+	async enrollmentWindow(): Promise<EnrollmentWindow | null> {
+		return this.config.storage.getEnrollmentWindow()
+	}
+
 	async enable(): Promise<EnrollmentWindow> {
 		const now = Date.now()
 		const expiresAt = now + this.config.enrollmentCodeTtlMs

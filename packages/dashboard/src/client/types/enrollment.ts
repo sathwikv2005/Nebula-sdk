@@ -14,3 +14,8 @@ export interface EnrollmentRequest {
 	createdAt: number
 	expiresAt: number
 }
+
+export interface EnrollmentWindow {
+	enabled: boolean
+	expiresAt: number | null
+}

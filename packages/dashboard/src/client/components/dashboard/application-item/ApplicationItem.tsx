@@ -27,16 +27,18 @@ export default function ApplicationItem({ application, onEdit, onDelete }: Appli
 		setDeleting(true)
 
 		try {
-			const success = await deleteApplication(application.id)
-
-			if (!success) {
+			const res = await deleteApplication(application.id)
+			if (!res) {
 				window.alert('Failed to delete application.')
 				return
 			}
-
+			if (res.error) {
+				window.alert(`Failed to delete application.\n${res.error.message}`)
+				return
+			}
 			onDelete(application.id)
-		} catch {
-			window.alert('An unexpected error occurred while deleting the application.')
+		} catch (error) {
+			window.alert(error)
 		} finally {
 			setDeleting(false)
 		}

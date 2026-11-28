@@ -88,7 +88,9 @@
 .navIcon {
 	width: 18px;
 	font-size: 17px;
-	text-align: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .navIndicator {

@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { Link, useLocation } from 'react-router'
 
 import styles from './Sidebar.module.css'
+import { FaBookOpen } from 'react-icons/fa'
+import { IoIosApps } from 'react-icons/io'
+import { MdDeviceHub } from 'react-icons/md'
+import { FaGear, FaPlus } from 'react-icons/fa6'
 
 type Section = {
 	label: string
-	icon: string
+	icon: ReactElement
 	path: string
 }
 
 const navigation: Section[] = [
-	{ label: 'Overview', icon: '◫', path: '/' },
-	{ label: 'Applications', icon: '▦', path: '/applications' },
-	{ label: 'Devices', icon: '▣', path: '/devices' },
-	{ label: 'Enrollment', icon: '⌁', path: '/enrollment' },
-	{ label: 'Settings', icon: '⚙', path: '/settings' },
+	{ label: 'Overview', icon: <FaBookOpen />, path: '/' },
+	{ label: 'Applications', icon: <IoIosApps />, path: '/applications' },
+	{ label: 'Devices', icon: <MdDeviceHub />, path: '/devices' },
+	{ label: 'Enrollment', icon: <FaPlus />, path: '/enrollment' },
+	{ label: 'Settings', icon: <FaGear />, path: '/settings' },
 ]
 
 interface SidebarProps {

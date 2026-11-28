@@ -1,0 +1,125 @@
+.modalOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background: #000000a8;
+	backdrop-filter: blur(4px);
+}
+
+.modal {
+	width: 100%;
+	max-width: 420px;
+	padding: 22px;
+	border: 1px solid var(--border-primary);
+	border-radius: 9px;
+	background: var(--bg-secondary);
+	box-shadow: 0 20px 60px #00000070;
+}
+
+.modalHeader {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 25px;
+}
+
+.modalHeader h3 {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.modalHeader p {
+	margin-top: 5px;
+	color: var(--text-muted);
+	font-size: 11px;
+}
+
+.closeButton {
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 23px;
+	cursor: pointer;
+}
+
+.closeButton:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.modal form {
+	display: flex;
+	flex-direction: column;
+}
+
+.modal form label {
+	margin-bottom: 8px;
+	color: var(--text-secondary);
+	font-size: 11px;
+}
+
+.modal form input {
+	width: 100%;
+	padding: 11px 12px;
+	border: 1px solid var(--border-primary);
+	border-radius: 5px;
+	outline: none;
+	background: var(--bg-primary);
+	color: var(--text-primary);
+	font-family: var(--font-inter);
+	font-size: 12px;
+}
+
+.modal form input:focus {
+	border-color: var(--accent-primary);
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 9px;
+	margin-top: 24px;
+}
+
+.cancelButton {
+	padding: 9px 13px;
+	border: 1px solid var(--border-primary);
+	border-radius: 5px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 11px;
+	cursor: pointer;
+}
+
+.submitButton {
+	padding: 9px 13px;
+	border: 1px solid var(--accent-primary);
+	border-radius: 5px;
+	background: var(--accent-primary);
+	color: #000;
+	font-family: var(--font-inter);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.submitButton:hover {
+	background: var(--accent-hover);
+}
+
+.submitButton:disabled,
+.cancelButton:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.error {
+	margin-top: 10px;
+	color: var(--status-error);
+	font-size: 11px;
+}

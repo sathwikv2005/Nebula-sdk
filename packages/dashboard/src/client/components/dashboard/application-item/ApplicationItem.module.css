@@ -1,19 +1,34 @@
+.application {
+	border-bottom: 1px solid var(--border-primary);
+}
+
+.application:last-child {
+	border-bottom: none;
+}
+
+.applicationTrigger {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+	cursor: pointer;
+}
+
+.applicationTrigger > :first-child {
+	flex: 1;
+	min-width: 0;
+}
+
 .listItem {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 	min-width: 0;
 	padding: 14px 20px;
-	border-bottom: 1px solid var(--border-primary);
 	transition: background 0.2s;
 }
 
-.listItem:hover {
+.applicationTrigger:hover .listItem {
 	background: var(--bg-tertiary);
-}
-
-.listItem:last-child {
-	border-bottom: none;
 }
 
 .itemIcon {
@@ -58,6 +73,113 @@
 	flex-shrink: 0;
 	color: var(--text-muted);
 	font-size: 10px;
+}
+
+.chevron {
+	padding: 0 20px;
+	color: var(--text-muted);
+	font-size: 18px;
+	transition: transform 0.2s;
+}
+
+.chevronOpen {
+	transform: rotate(180deg);
+}
+
+/* Details */
+
+.details {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 30px;
+	padding: 18px 20px 22px;
+	border-top: 1px solid var(--border-primary);
+	background: var(--bg-primary);
+}
+
+.detail {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	min-width: 0;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--border-primary);
+}
+
+.detailLabel {
+	color: var(--text-muted);
+	font-size: 10px;
+	font-weight: 500;
+}
+
+.detailValue {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	color: var(--text-primary);
+	font-size: 11px;
+}
+
+.mono {
+	font-family: monospace;
+	font-size: 10px;
+}
+
+/* Actions */
+
+.detailActions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	grid-column: 1 / -1;
+	gap: 9px;
+	padding-top: 16px;
+}
+
+.editButton,
+.deleteButton {
+	padding: 8px 12px;
+	border: 1px solid var(--border-primary);
+	border-radius: 5px;
+	font-family: var(--font-inter);
+	font-size: 10px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: 0.2s ease;
+}
+
+.editButton {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+}
+
+.editButton:hover {
+	border-color: var(--accent-primary);
+	color: var(--accent-primary);
+}
+
+.deleteButton {
+	border-color: #ff526340;
+	background: #ff526310;
+	color: var(--status-error);
+}
+
+.deleteButton:hover {
+	border-color: var(--status-error);
+	background: #ff526325;
+}
+
+.deleteButton:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+	.details {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 430px) {

@@ -26,6 +26,12 @@
 	font-size: 11px;
 }
 
+.headerActions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
 .count {
 	flex-shrink: 0;
 	padding: 5px 9px;
@@ -35,7 +41,45 @@
 	font-size: 10px;
 }
 
+.createButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	padding: 9px 13px;
+	border: 1px solid var(--accent-primary);
+	border-radius: 5px;
+	background: var(--accent-primary);
+	color: #000;
+	font-family: var(--font-inter);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.createButton:hover {
+	background: var(--accent-hover);
+}
+
+.createButton > span {
+	font-size: 16px;
+	line-height: 10px;
+}
+
 .list {
 	display: flex;
 	flex-direction: column;
+}
+
+@media (max-width: 600px) {
+	.panelHeader {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.headerActions {
+		width: 100%;
+		justify-content: space-between;
+	}
 }

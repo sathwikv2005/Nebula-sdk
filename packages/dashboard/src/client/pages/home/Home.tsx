@@ -75,7 +75,9 @@ export default function Home() {
 
 	const dashboardContext: DashboardContext = {
 		applications,
+		setApplications,
 		devices,
+		setDevices,
 		loading,
 		error,
 	}

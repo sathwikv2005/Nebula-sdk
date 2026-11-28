@@ -1,7 +1,8 @@
+import { EnrollmentWindow } from '../services/enrollment.js'
 import type { Application } from '../types/application.js'
 import type { Challenge } from '../types/challenge.js'
 import type { Device } from '../types/device.js'
-import type { EnrollmentRequest } from '../types/enrollment.js'
+import type { EnrollmentRequest, EnrollmentRequestResponse } from '../types/enrollment.js'
 import type { Session } from '../types/session.js'
 
 export interface StorageAdapter {
@@ -14,17 +15,19 @@ export interface StorageAdapter {
 	deleteApplication(id: string): Promise<void>
 	decrementDeviceCount(applicationId: string): Promise<void>
 
-	getEnrollmentWindow(): Promise<{ expiresAt: number } | null>
+	getEnrollmentWindow(): Promise<EnrollmentWindow | null>
 	enableEnrollment(expiresAt: number, now: number): Promise<boolean>
 	disableEnrollment(): Promise<void>
 
 	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean>
 	approveEnrollment(
+		codeHash: string,
 		requestId: string,
 		applicationId: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null>
+	getEnrollmentReuests(): Promise<EnrollmentRequestResponse[]>
 
 	getDevice(id: string): Promise<Device | null>
 	getDevices(applicationId: string): Promise<Device[]>

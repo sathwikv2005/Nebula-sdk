@@ -86,6 +86,35 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
+	// Admin: get enrollement window
+	router.get(
+		'/enrollment/window',
+		adminAuth,
+		asyncHandler(async (req, res) => {
+			const window = await core.enrollment.enrollmentWindow()
+			return res.json({
+				success: true,
+				data: {
+					enabled: window !== null && Date.now() < window.expiresAt,
+					expiresAt: window?.expiresAt ?? null,
+				},
+			})
+		}),
+	)
+
+	// Admin: get enrollement requests
+	router.get(
+		'/enrollment/requests',
+		adminAuth,
+		asyncHandler(async (req, res) => {
+			const requests = await core.enrollment.getRequests()
+			return res.json({
+				success: true,
+				data: requests,
+			})
+		}),
+	)
+
 	// Admin: approve a pending request and assign it to an application.
 	router.post(
 		'/enrollment/requests/:requestId/approve',
@@ -95,9 +124,10 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 			if (!requestId) return
 
 			const applicationId = getString(req.body?.applicationId, 'applicationId', res)
-			if (!applicationId) return
+			const code = getString(req.body?.code, 'code', res)
+			if (!applicationId || !code) return
 
-			const device = await core.enrollment.approve(requestId, applicationId)
+			const device = await core.enrollment.approve(requestId, applicationId, code)
 
 			res.status(201).json({
 				success: true,

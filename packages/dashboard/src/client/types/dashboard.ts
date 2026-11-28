@@ -12,4 +12,6 @@ export interface DashboardContext {
 
 	loading: boolean
 	error: string
+
+	refreshDashboard: () => void
 }

@@ -1,4 +1,9 @@
-import type { Device, EnrollmentRequest } from '@nebula-sdk/core'
+import type {
+	Device,
+	EnrollmentRequest,
+	EnrollmentRequestResponse,
+	EnrollmentWindow,
+} from '@nebula-sdk/core'
 
 import type { createNebulaModels } from '../models.js'
 
@@ -7,7 +12,7 @@ type NebulaModels = ReturnType<typeof createNebulaModels>
 export class EnrollmentAdapter {
 	constructor(private readonly models: NebulaModels) {}
 
-	async getEnrollmentWindow(): Promise<{ expiresAt: number } | null> {
+	async getEnrollmentWindow(): Promise<EnrollmentWindow | null> {
 		const state = await this.models.EnrollmentState.findOne({
 			id: 'global',
 			expiresAt: { $gt: new Date() },
@@ -164,6 +169,7 @@ export class EnrollmentAdapter {
 	}
 
 	async approveEnrollment(
+		codeHash: string,
 		requestId: string,
 		applicationId: string,
 		deviceId: string,
@@ -200,9 +206,9 @@ export class EnrollmentAdapter {
 					return null
 				}
 
-				// Verify the enrollment request.
 				const enrollment = await this.models.Enrollment.findOne({
 					id: requestId,
+					codeHash,
 					status: 'pending',
 					expiresAt: { $gt: new Date(now) },
 				})
@@ -242,6 +248,7 @@ export class EnrollmentAdapter {
 				const approved = await this.models.Enrollment.findOneAndUpdate(
 					{
 						id: requestId,
+						codeHash,
 						status: 'pending',
 						expiresAt: { $gt: new Date(now) },
 					},
@@ -298,5 +305,21 @@ export class EnrollmentAdapter {
 		} finally {
 			await session.endSession()
 		}
+	}
+
+	async getEnrollmentRequests(): Promise<EnrollmentRequestResponse[]> {
+		const requests = await this.models.Enrollment.find({
+			status: 'pending',
+			expiresAt: { $gt: new Date() },
+		})
+			.select('-codeHash -_id -__v')
+			.lean()
+			.exec()
+
+		return requests.map((request) => ({
+			...request,
+			expiresAt: new Date(request.expiresAt).getTime(),
+			createdAt: new Date(request.createdAt).getTime(),
+		})) as EnrollmentRequestResponse[]
 	}
 }

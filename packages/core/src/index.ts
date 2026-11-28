@@ -7,7 +7,12 @@ export type { Application } from './types/application.js'
 
 export type { Device, DeviceInfo, DeviceStatus } from './types/device.js'
 
-export type { EnrollmentRequest, EnrollmentStatus } from './types/enrollment.js'
+export type {
+	EnrollmentRequest,
+	EnrollmentStatus,
+	EnrollmentRequestResponse,
+	EnrollmentWindow,
+} from './types/enrollment.js'
 
 export type { Challenge } from './types/challenge.js'
 

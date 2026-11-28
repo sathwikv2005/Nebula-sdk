@@ -1,4 +1,21 @@
+import type { DeviceInfo } from './device'
+
 export interface Enrollment {
-	applicationId: string
 	expiresAt: number
+}
+
+export type EnrollmentStatus = 'pending' | 'approved' | 'rejected' | 'expired'
+
+export interface EnrollmentRequest {
+	id: string
+	publicKey: string
+	info: DeviceInfo
+	status: EnrollmentStatus
+	createdAt: number
+	expiresAt: number
+}
+
+export interface EnrollmentWindow {
+	enabled: boolean
+	expiresAt: number | null
 }

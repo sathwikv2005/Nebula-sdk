@@ -95,6 +95,10 @@ export class EnrollmentService {
 			throw new EnrollmentError('Enrollment request not found, expired, or already processed')
 		}
 
+		await this.config.storage.updateApplication(applicationId, {
+			deviceCount: application.deviceCount + 1,
+		})
+
 		return device
 	}
 

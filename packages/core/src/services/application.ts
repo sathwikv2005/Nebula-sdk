@@ -29,9 +29,7 @@ export class ApplicationService {
 		const application: Application = {
 			id: randomUUID(),
 			name,
-			enrollmentEnabled: false,
-			enrollmentExpiresAt: null,
-			enrollmentRequestId: null,
+			deviceCount: 0,
 			createdAt: now,
 			updatedAt: now,
 		}

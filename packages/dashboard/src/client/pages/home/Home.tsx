@@ -25,6 +25,7 @@ export default function Home() {
 	const [devices, setDevices] = useState<Device[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState('')
+	const [refresh, setRefresh] = useState(0)
 
 	useEffect(() => {
 		let mounted = true
@@ -59,7 +60,7 @@ export default function Home() {
 		return () => {
 			mounted = false
 		}
-	}, [])
+	}, [refresh])
 
 	async function handleLogout() {
 		try {
@@ -80,6 +81,7 @@ export default function Home() {
 		setDevices,
 		loading,
 		error,
+		refreshDashboard: () => setRefresh((previous) => previous + 1),
 	}
 
 	return (

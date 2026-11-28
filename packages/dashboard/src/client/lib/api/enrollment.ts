@@ -44,14 +44,14 @@ export async function approveEnrollment(
 	requestId: string,
 	applicationId: string,
 	code: string,
-): Promise<Device | null> {
+): Promise<ApiResponse<Device> | null> {
 	const res = await nebulaRequest(`/enrollment/requests/${encodeURIComponent(requestId)}/approve`, {
 		method: 'POST',
 		body: JSON.stringify({ applicationId, code }),
 	})
 
-	if (!res?.ok) return null
+	if (!res) return null
 
 	const result: ApiResponse<Device> = await res.json()
-	return result.data ?? null
+	return result ?? null
 }

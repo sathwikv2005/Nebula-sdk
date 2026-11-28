@@ -6,6 +6,7 @@ import { deleteApplication } from '../../../lib/api/applications'
 import { formatDate } from '../../../utils/dashboard'
 
 import styles from './ApplicationItem.module.css'
+import { IoIosApps } from 'react-icons/io'
 
 interface ApplicationItemProps {
 	application: Application
@@ -60,7 +61,9 @@ export default function ApplicationItem({ application, onEdit, onDelete }: Appli
 				}}
 			>
 				<div className={styles.listItem}>
-					<div className={styles.itemIcon}>▦</div>
+					<div className={styles.itemIcon}>
+						<IoIosApps />
+					</div>
 
 					<div className={styles.itemDetails}>
 						<strong>{application.name}</strong>

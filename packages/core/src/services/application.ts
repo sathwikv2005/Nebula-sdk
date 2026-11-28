@@ -29,9 +29,7 @@ export class ApplicationService {
 		const application: Application = {
 			id: randomUUID(),
 			name,
-			enrollmentEnabled: false,
-			enrollmentExpiresAt: null,
-			enrollmentRequestId: null,
+			deviceCount: 0,
 			createdAt: now,
 			updatedAt: now,
 		}
@@ -82,7 +80,12 @@ export class ApplicationService {
 	}
 
 	async delete(id: string): Promise<void> {
-		await this.get(id)
+		const application = await this.get(id)
+
+		if (application.deviceCount > 0) {
+			throw new ApplicationError('Cannot delete application while it has registered devices')
+		}
+
 		await this.config.storage.deleteApplication(id)
 	}
 }

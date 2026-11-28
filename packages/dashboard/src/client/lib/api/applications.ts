@@ -51,13 +51,13 @@ export async function updateApplication(
 	return result.data ?? null
 }
 
-export async function deleteApplication(id: string): Promise<boolean> {
+export async function deleteApplication(id: string): Promise<ApiResponse<null> | null> {
 	const res = await nebulaRequest(`${ROUTE}/${encodeURIComponent(id)}`, {
 		method: 'DELETE',
 	})
 
-	if (!res?.ok) return false
+	if (!res) return null
 
 	const result: ApiResponse<null> = await res.json()
-	return result.success
+	return result
 }

@@ -27,16 +27,18 @@ export default function ApplicationItem({ application, onEdit, onDelete }: Appli
 		setDeleting(true)
 
 		try {
-			const success = await deleteApplication(application.id)
-
-			if (!success) {
+			const res = await deleteApplication(application.id)
+			if (!res) {
 				window.alert('Failed to delete application.')
 				return
 			}
-
+			if (res.error) {
+				window.alert(`Failed to delete application.\n${res.error.message}`)
+				return
+			}
 			onDelete(application.id)
-		} catch {
-			window.alert('An unexpected error occurred while deleting the application.')
+		} catch (error) {
+			window.alert(error)
 		} finally {
 			setDeleting(false)
 		}
@@ -76,7 +78,7 @@ export default function ApplicationItem({ application, onEdit, onDelete }: Appli
 			{expanded && (
 				<div className={styles.details}>
 					<Detail label="Name" value={application.name} />
-					<Detail label="Application ID" value={application.id} mono />
+					<Detail label="Device Count" value={application.deviceCount.toString()} mono />
 					<Detail label="Created At" value={formatDate(application.createdAt)} />
 					<Detail label="Last Updated" value={formatDate(application.updatedAt)} />
 

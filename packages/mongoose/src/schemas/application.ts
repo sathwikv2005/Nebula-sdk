@@ -12,18 +12,10 @@ export const applicationSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		enrollmentEnabled: {
-			type: Boolean,
-			default: false,
-			required: true,
-		},
-		enrollmentExpiresAt: {
+		deviceCount: {
 			type: Number,
-			default: null,
-		},
-		enrollmentRequestId: {
-			type: String,
-			default: null,
+			default: 0,
+			min: 0,
 		},
 		createdAt: {
 			type: Number,

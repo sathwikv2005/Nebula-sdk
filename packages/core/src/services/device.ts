@@ -25,4 +25,15 @@ export class DeviceService {
 
 		return devices
 	}
+
+	async deleteDevice(deviceId: string): Promise<void> {
+		const device = await this.config.storage.getDevice(deviceId)
+
+		if (!device) {
+			throw new DeviceError('Device not found')
+		}
+
+		await this.config.storage.deleteDevice(deviceId)
+		await this.config.storage.decrementDeviceCount(device.applicationId)
+	}
 }

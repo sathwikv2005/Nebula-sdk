@@ -1,9 +1,7 @@
 export interface Application {
 	id: string
 	name: string
-	enrollmentEnabled: boolean
-	enrollmentExpiresAt: number | null
-	enrollmentRequestId: string | null
+	deviceCount: number
 	createdAt: number
 	updatedAt: number
 }

@@ -138,4 +138,8 @@ export class MongooseAdapter implements StorageAdapter {
 	revokeDeviceSessions(deviceId: string): Promise<number> {
 		return this.session.revokeDeviceSessions(deviceId)
 	}
+
+	decrementDeviceCount(applicationId: string): Promise<void> {
+		return this.application.decrementDeviceCount(applicationId)
+	}
 }

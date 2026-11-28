@@ -46,5 +46,18 @@ export function createDeviceRouter(core: CoreNebula): Router {
 		}),
 	)
 
+	// Delete a device
+	router.delete(
+		'/:id',
+		asyncHandler(async (req, res) => {
+			await core.device.deleteDevice(getParam(req.params.id))
+
+			res.json({
+				ok: true,
+				message: 'Device deleted successfully',
+			})
+		}),
+	)
+
 	return router
 }

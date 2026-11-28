@@ -13,7 +13,7 @@ import ErrorState from '../../components/dashboard/error-state/ErrorState'
 import styles from './Devices.module.css'
 
 export default function Devices() {
-	const { devices, applications, loading, error } = useOutletContext<DashboardContext>()
+	const { devices, applications, setDevices, loading, error } = useOutletContext<DashboardContext>()
 
 	const [expandedApplications, setExpandedApplications] = useState<string[]>([])
 
@@ -114,6 +114,7 @@ export default function Devices() {
 													key={device.id}
 													device={device}
 													applicationName={application.name}
+													setDevices={setDevices}
 												/>
 											))
 										)}

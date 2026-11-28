@@ -3,8 +3,12 @@ import { RiArrowDownSLine } from 'react-icons/ri'
 import { FaComputer } from 'react-icons/fa6'
 import { FaMobileAlt } from 'react-icons/fa'
 import { IoIosGlobe } from 'react-icons/io'
+import { FiTrash2 } from 'react-icons/fi'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { Device } from '../../../types/device'
+
+import { deleteDevice } from '../../../lib/api/device'
 import { formatDate, getDeviceName } from '../../../utils/dashboard'
 
 import styles from './DeviceItem.module.css'
@@ -28,10 +32,37 @@ function getDeviceIcon(platform: string | undefined) {
 interface DeviceItemProps {
 	device: Device
 	applicationName: string
+	setDevices: Dispatch<SetStateAction<Device[]>>
 }
 
-export default function DeviceItem({ device, applicationName }: DeviceItemProps) {
+export default function DeviceItem({ device, applicationName, setDevices }: DeviceItemProps) {
 	const [expanded, setExpanded] = useState(false)
+	const [deleting, setDeleting] = useState(false)
+
+	const handleDelete = async () => {
+		const confirmed = window.confirm(
+			`Are you sure you want to delete this device (${getDeviceName(device)})?`,
+		)
+
+		if (!confirmed) return
+
+		setDeleting(true)
+
+		try {
+			const success = await deleteDevice(device.id)
+			console.log(success)
+			if (success) {
+				setDevices((prev) => prev.filter((item) => item.id !== device.id))
+			} else {
+				window.alert('Failed to delete device. Please try again.')
+			}
+		} catch (error) {
+			console.error(error)
+			window.alert('Something went wrong while deleting the device.')
+		} finally {
+			setDeleting(false)
+		}
+	}
 
 	return (
 		<div className={styles.listItem}>
@@ -102,12 +133,12 @@ export default function DeviceItem({ device, applicationName }: DeviceItemProps)
 							</strong>
 						</div>
 
-						<div className={`${styles.detail}`}>
+						<div className={styles.detail}>
 							<span>Application</span>
 							<strong>{applicationName}</strong>
 						</div>
 
-						<div className={`${styles.detail}`}>
+						<div className={styles.detail}>
 							<span>Application ID</span>
 							<strong>{device.applicationId}</strong>
 						</div>
@@ -116,6 +147,18 @@ export default function DeviceItem({ device, applicationName }: DeviceItemProps)
 							<span>Public Key</span>
 							<strong className={styles.publicKey}>{device.publicKey}</strong>
 						</div>
+					</div>
+
+					<div className={styles.actions}>
+						<button
+							type="button"
+							className={styles.deleteButton}
+							onClick={handleDelete}
+							disabled={deleting}
+						>
+							<FiTrash2 />
+							{deleting ? 'Deleting...' : 'Delete Device'}
+						</button>
 					</div>
 				</div>
 			)}

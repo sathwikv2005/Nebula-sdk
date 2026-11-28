@@ -69,4 +69,11 @@ export class ApplicationAdapter {
 
 		return result.matchedCount > 0
 	}
+
+	async decrementDeviceCount(applicationId: string): Promise<void> {
+		await this.models.Application.updateOne(
+			{ id: applicationId, deviceCount: { $gt: 0 } },
+			{ $inc: { deviceCount: -1 } },
+		)
+	}
 }

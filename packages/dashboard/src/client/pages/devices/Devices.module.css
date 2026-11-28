@@ -1,0 +1,41 @@
+.panel {
+	min-width: 0;
+	overflow: hidden;
+	border: 1px solid var(--border-primary);
+	border-radius: 9px;
+	background: var(--bg-secondary);
+}
+
+.panelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 20px;
+	border-bottom: 1px solid var(--border-primary);
+}
+
+.panelHeader h2 {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.panelHeader p {
+	margin-top: 5px;
+	color: var(--text-muted);
+	font-size: 11px;
+}
+
+.count {
+	flex-shrink: 0;
+	padding: 5px 9px;
+	border: 1px solid var(--border-primary);
+	border-radius: 5px;
+	color: var(--text-secondary);
+	font-size: 10px;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+}

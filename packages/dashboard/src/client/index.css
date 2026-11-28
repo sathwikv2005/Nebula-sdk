@@ -38,6 +38,10 @@
 	margin: 0;
 }
 
+a {
+	text-decoration: none;
+}
+
 body {
 	background: var(--bg-primary);
 	color: var(--text-primary);

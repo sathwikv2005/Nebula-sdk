@@ -1,0 +1,91 @@
+.listItem {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--border-primary);
+	transition: background 0.2s;
+}
+
+.listItem:hover {
+	background: var(--bg-tertiary);
+}
+
+.listItem:last-child {
+	border-bottom: none;
+}
+
+.itemIcon {
+	display: grid;
+	flex-shrink: 0;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border: 1px solid var(--border-primary);
+	border-radius: 7px;
+	background: var(--bg-tertiary);
+	color: var(--accent-primary);
+	font-size: 15px;
+}
+
+.itemDetails {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 5px;
+	min-width: 0;
+}
+
+.itemDetails strong {
+	overflow: hidden;
+	color: var(--text-primary);
+	font-size: 12px;
+	font-weight: 500;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.itemDetails span {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: 10px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.deviceMeta {
+	display: flex;
+	flex-shrink: 0;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 5px;
+}
+
+.status {
+	padding: 4px 7px;
+	border-radius: 4px;
+	font-size: 9px;
+	text-transform: capitalize;
+}
+
+.statusActive {
+	background: var(--bg-tertiary);
+	color: var(--status-success);
+}
+
+.statusRevoked {
+	background: var(--bg-tertiary);
+	color: var(--status-error);
+}
+
+.itemDate {
+	color: var(--text-muted);
+	font-size: 10px;
+}
+
+@media (max-width: 430px) {
+	.itemDate {
+		display: none;
+	}
+}

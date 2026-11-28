@@ -1,0 +1,30 @@
+.error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	padding: 65px 20px;
+	color: var(--text-secondary);
+	font-size: 13px;
+	text-align: center;
+}
+
+.error > span {
+	display: grid;
+	place-items: center;
+	width: 35px;
+	height: 35px;
+	border-radius: 50%;
+	background: var(--bg-tertiary);
+	color: var(--status-error);
+	font-size: 18px;
+}
+
+.error button {
+	padding: 9px 16px;
+	border: 1px solid var(--border-primary);
+	border-radius: 6px;
+	background: var(--bg-secondary);
+	color: var(--accent-primary);
+	cursor: pointer;
+}

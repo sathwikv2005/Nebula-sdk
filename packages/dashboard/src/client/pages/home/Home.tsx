@@ -96,7 +96,14 @@ export default function Home() {
 						) : error ? (
 							<ErrorState message={error} onRetry={() => window.location.reload()} />
 						) : (
-							<Overview applications={applications} devices={devices} />
+							<Overview
+								applications={applications}
+								devices={devices}
+								setApplications={setApplications}
+								setDevices={setDevices}
+								loading={loading}
+								error={error}
+							/>
 						)
 					) : (
 						<Outlet context={dashboardContext} />

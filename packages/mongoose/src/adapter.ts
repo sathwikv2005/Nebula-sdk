@@ -77,12 +77,13 @@ export class MongooseAdapter implements StorageAdapter {
 	}
 
 	approveEnrollment(
+		codeHash: string,
 		requestId: string,
 		applicationId: string,
 		deviceId: string,
 		now: number,
 	): Promise<Device | null> {
-		return this.enrollment.approveEnrollment(requestId, applicationId, deviceId, now)
+		return this.enrollment.approveEnrollment(codeHash, requestId, applicationId, deviceId, now)
 	}
 
 	getEnrollmentReuests(): Promise<EnrollmentRequestResponse[]> {

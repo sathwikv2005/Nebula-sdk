@@ -169,6 +169,7 @@ export class EnrollmentAdapter {
 	}
 
 	async approveEnrollment(
+		codeHash: string,
 		requestId: string,
 		applicationId: string,
 		deviceId: string,
@@ -205,9 +206,9 @@ export class EnrollmentAdapter {
 					return null
 				}
 
-				// Verify the enrollment request.
 				const enrollment = await this.models.Enrollment.findOne({
 					id: requestId,
+					codeHash,
 					status: 'pending',
 					expiresAt: { $gt: new Date(now) },
 				})
@@ -247,6 +248,7 @@ export class EnrollmentAdapter {
 				const approved = await this.models.Enrollment.findOneAndUpdate(
 					{
 						id: requestId,
+						codeHash,
 						status: 'pending',
 						expiresAt: { $gt: new Date(now) },
 					},

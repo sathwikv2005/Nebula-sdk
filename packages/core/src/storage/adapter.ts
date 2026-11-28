@@ -21,6 +21,7 @@ export interface StorageAdapter {
 
 	createEnrollmentRequest(request: EnrollmentRequest, now: number): Promise<boolean>
 	approveEnrollment(
+		codeHash: string,
 		requestId: string,
 		applicationId: string,
 		deviceId: string,

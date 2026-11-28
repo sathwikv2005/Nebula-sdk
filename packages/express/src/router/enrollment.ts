@@ -124,9 +124,10 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 			if (!requestId) return
 
 			const applicationId = getString(req.body?.applicationId, 'applicationId', res)
-			if (!applicationId) return
+			const code = getString(req.body?.code, 'code', res)
+			if (!applicationId || !code) return
 
-			const device = await core.enrollment.approve(requestId, applicationId)
+			const device = await core.enrollment.approve(requestId, applicationId, code)
 
 			res.status(201).json({
 				success: true,

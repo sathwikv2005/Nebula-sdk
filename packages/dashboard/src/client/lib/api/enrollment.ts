@@ -43,10 +43,11 @@ export async function disableEnrollment(): Promise<boolean> {
 export async function approveEnrollment(
 	requestId: string,
 	applicationId: string,
+	code: string,
 ): Promise<Device | null> {
 	const res = await nebulaRequest(`/enrollment/requests/${encodeURIComponent(requestId)}/approve`, {
 		method: 'POST',
-		body: JSON.stringify({ applicationId }),
+		body: JSON.stringify({ applicationId, code }),
 	})
 
 	if (!res?.ok) return null

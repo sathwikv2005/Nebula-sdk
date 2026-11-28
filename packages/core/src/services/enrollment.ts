@@ -85,7 +85,7 @@ export class EnrollmentService {
 		}
 	}
 
-	async approve(requestId: string, applicationId: string): Promise<Device> {
+	async approve(requestId: string, applicationId: string, code: string): Promise<Device> {
 		const application = await this.config.storage.getApplication(applicationId)
 
 		if (!application) {
@@ -93,6 +93,7 @@ export class EnrollmentService {
 		}
 
 		const device = await this.config.storage.approveEnrollment(
+			hash(code, this.config.secret),
 			requestId,
 			applicationId,
 			randomUUID(),

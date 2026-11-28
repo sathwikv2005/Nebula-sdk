@@ -30,3 +30,12 @@ export async function getApplicationDevices(applicationId: string): Promise<Devi
 	const result: ApiResponse<Device[]> = await res.json()
 	return result.data ?? null
 }
+
+export async function deleteDevice(deviceId: string): Promise<boolean> {
+	const res = await nebulaRequest(`${ROUTE}/${encodeURIComponent(deviceId)}`, { method: 'DELETE' })
+
+	if (!res?.ok) return false
+
+	const result: ApiResponse<null> = await res.json()
+	return result.success
+}

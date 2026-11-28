@@ -27,6 +27,7 @@ export class Nebula {
 			adminAuth,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,
+			loginPath,
 			...config
 		} = options
 
@@ -36,6 +37,10 @@ export class Nebula {
 
 		if (admin && adminAuth) {
 			throw new Error('Provide either admin credentials or adminAuth middleware, but not both.')
+		}
+
+		if (adminAuth && !loginPath) {
+			throw new Error('loginPath must be provided when using custom adminAuth middleware.')
 		}
 
 		this.ownsConnection = !connection
@@ -59,6 +64,7 @@ export class Nebula {
 		this.routerInstance = createNebulaRouter(
 			this.core,
 			resolvedAdminAuth!,
+			loginPath,
 			this.adminStorage,
 			errorHandler,
 			enableDeviceAuthOnAllRoutes,

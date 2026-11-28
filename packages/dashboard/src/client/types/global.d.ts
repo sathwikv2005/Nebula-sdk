@@ -6,6 +6,8 @@ declare global {
 			apiRoute: string
 			title?: string
 			basePath: string
+			loginPath: string
+			customLogin: boolean
 		}
 	}
 }

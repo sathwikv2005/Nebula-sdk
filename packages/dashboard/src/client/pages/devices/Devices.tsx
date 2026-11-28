@@ -10,7 +10,7 @@ import ErrorState from '../../components/dashboard/error-state/ErrorState'
 import styles from './Devices.module.css'
 
 export default function Devices() {
-	const { devices, loading, error } = useOutletContext<DashboardContext>()
+	const { devices, applications, loading, error } = useOutletContext<DashboardContext>()
 
 	if (loading) return <Loading message="Loading devices..." />
 
@@ -33,9 +33,17 @@ export default function Devices() {
 				<EmptyState message="No devices have been enrolled yet." />
 			) : (
 				<div className={styles.list}>
-					{devices.map((device) => (
-						<DeviceItem key={device.id} device={device} />
-					))}
+					{devices.map((device) => {
+						const application = applications.find((app) => app.id === device.applicationId)
+
+						return (
+							<DeviceItem
+								key={device.id}
+								device={device}
+								applicationName={application?.name ?? 'Unknown application'}
+							/>
+						)
+					})}
 				</div>
 			)}
 		</section>

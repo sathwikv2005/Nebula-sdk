@@ -107,7 +107,7 @@
 }
 
 .detailLabel {
-	color: var(--text-muted);
+	color: var(--accent-hover);
 	font-size: 10px;
 	font-weight: 500;
 }

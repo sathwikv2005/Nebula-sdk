@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router'
+import { useMemo, useState } from 'react'
+import { Link, useOutletContext } from 'react-router'
 
 import { IoIosApps } from 'react-icons/io'
 import { MdDeviceHub, MdOutlineDoNotDisturb } from 'react-icons/md'
@@ -14,6 +14,7 @@ import DeviceItem from '../../components/dashboard/device-item/DeviceItem'
 import EmptyState from '../../components/dashboard/empty-state/EmptyState'
 
 import styles from './Overview.module.css'
+import type { DashboardContext } from '../../types/dashboard'
 
 interface OverviewProps {
 	applications: Application[]
@@ -21,6 +22,15 @@ interface OverviewProps {
 }
 
 export default function Overview({ applications, devices }: OverviewProps) {
+	const { setApplications, loading, error } = useOutletContext<DashboardContext>()
+
+	const [showCreateModal, setShowCreateModal] = useState(false)
+	const [editingApplication, setEditingApplication] = useState<Application | null>(null)
+
+	const handleDeleted = (id: string) => {
+		setApplications((current) => current.filter((app) => app.id !== id))
+	}
+
 	const stats = useMemo(() => {
 		const active = devices.filter((device) => device.status === 'active').length
 		const revoked = devices.filter((device) => device.status === 'revoked').length
@@ -100,7 +110,12 @@ export default function Overview({ applications, devices }: OverviewProps) {
 					) : (
 						<div className={styles.list}>
 							{applications.slice(0, 5).map((app) => (
-								<ApplicationItem key={app.id} application={app} />
+								<ApplicationItem
+									key={app.id}
+									application={app}
+									onEdit={setEditingApplication}
+									onDelete={handleDeleted}
+								/>
 							))}
 						</div>
 					)}
@@ -123,7 +138,13 @@ export default function Overview({ applications, devices }: OverviewProps) {
 					) : (
 						<div className={styles.list}>
 							{recentDevices.map((device) => (
-								<DeviceItem key={device.id} device={device} />
+								<DeviceItem
+									key={device.id}
+									device={device}
+									applicationName={
+										applications.find((x) => x.id === device.applicationId)?.name || 'unknown'
+									}
+								/>
 							))}
 						</div>
 					)}

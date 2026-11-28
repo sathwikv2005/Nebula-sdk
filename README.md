@@ -170,17 +170,31 @@ By default, this option is `false`, allowing you to selectively protect individu
 
 ### Using your own admin authentication
 
-Nebula also allows you to integrate your existing authentication middleware for protecting the Nebula administrator dashboard.
+If you already have an authentication system, you can reuse it instead of maintaining separate Nebula administrator credentials.
+
+Provide your own Express authentication middleware through `adminAuth` and specify your application's login page through `loginPath`:
 
 ```javascript
 const nebula = new Nebula({
 	uri: process.env.MONGOURI,
 	secret: process.env.NEBULA_SECRET,
+
 	adminAuth: check_auth,
+	loginPath: '/login',
 })
 ```
 
-This lets you reuse your application's existing administrator authentication instead of configuring separate Nebula administrator credentials.
+`adminAuth` must be an Express-compatible middleware that authenticates and authorizes administrator requests.
+
+`loginPath` specifies where unauthenticated dashboard users should be redirected. It must be an absolute application path beginning with `/`. Nebula resolves it against the application's origin.
+
+For example, if your application runs at `https://example.com` and you configure `/login`, unauthenticated dashboard users are redirected to `https://example.com/login`.
+
+This allows you to integrate Nebula with existing authentication systems such as Passport, custom Express sessions, or JWT-based authentication.
+
+**Note:** When using custom `adminAuth`, `loginPath` is required. You are responsible for implementing the login page and ensuring your authentication middleware can validate requests made by the dashboard.
+
+You cannot provide both `admin` credentials and `adminAuth`. Choose one administrator authentication strategy.
 
 ---
 

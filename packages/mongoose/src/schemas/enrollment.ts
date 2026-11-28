@@ -41,6 +41,4 @@ export const enrollmentSchema = new Schema(
 	},
 )
 
-enrollmentSchema.index({ applicationId: 1, codeHash: 1 }, { unique: true })
-
 enrollmentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })

@@ -154,6 +154,7 @@ export default function Overview({
 								<DeviceItem
 									key={device.id}
 									device={device}
+									setDevices={setDevices}
 									applicationName={
 										applications.find((x) => x.id === device.applicationId)?.name || 'unknown'
 									}

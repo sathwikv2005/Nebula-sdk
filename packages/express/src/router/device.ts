@@ -14,7 +14,7 @@ export function createDeviceRouter(core: CoreNebula): Router {
 			const devices = await core.device.getAll()
 
 			res.json({
-				ok: true,
+				success: true,
 				data: devices,
 			})
 		}),
@@ -27,7 +27,7 @@ export function createDeviceRouter(core: CoreNebula): Router {
 			const device = await core.device.get(getParam(req.params.id))
 
 			res.json({
-				ok: true,
+				success: true,
 				data: device,
 			})
 		}),
@@ -40,7 +40,7 @@ export function createDeviceRouter(core: CoreNebula): Router {
 			const devices = await core.device.getDevices(getParam(req.params.applicationId))
 
 			res.json({
-				ok: true,
+				success: true,
 				data: devices,
 			})
 		}),
@@ -53,7 +53,7 @@ export function createDeviceRouter(core: CoreNebula): Router {
 			await core.device.deleteDevice(getParam(req.params.id))
 
 			res.json({
-				ok: true,
+				success: true,
 				message: 'Device deleted successfully',
 			})
 		}),

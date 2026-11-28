@@ -1,4 +1,4 @@
-import type { Device, EnrollmentRequest } from '@nebula-sdk/core'
+import type { Device, EnrollmentRequest, EnrollmentRequestResponse } from '@nebula-sdk/core'
 
 import type { createNebulaModels } from '../models.js'
 
@@ -298,5 +298,21 @@ export class EnrollmentAdapter {
 		} finally {
 			await session.endSession()
 		}
+	}
+
+	async getEnrollmentRequests(): Promise<EnrollmentRequestResponse[]> {
+		const requests = await this.models.Enrollment.find({
+			status: 'pending',
+			expiresAt: { $gt: new Date() },
+		})
+			.select('-codeHash -_id -__v')
+			.lean()
+			.exec()
+
+		return requests.map((request) => ({
+			...request,
+			expiresAt: new Date(request.expiresAt).getTime(),
+			createdAt: new Date(request.createdAt).getTime(),
+		})) as EnrollmentRequestResponse[]
 	}
 }

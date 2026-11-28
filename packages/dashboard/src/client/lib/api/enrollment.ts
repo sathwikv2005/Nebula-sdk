@@ -1,7 +1,16 @@
 import type { ApiResponse } from '../../types/apiResponse'
 import type { Device } from '../../types/device'
-import type { Enrollment } from '../../types/enrollment'
+import type { Enrollment, EnrollmentRequest } from '../../types/enrollment'
 import { nebulaRequest } from './request'
+
+export async function getEnrollmentRequests(): Promise<EnrollmentRequest[] | null> {
+	const res = await nebulaRequest('/enrollment/requests')
+
+	if (!res?.ok) return null
+
+	const result: ApiResponse<EnrollmentRequest[]> = await res.json()
+	return result.data ?? null
+}
 
 export async function enableEnrollment(): Promise<Enrollment | null> {
 	const res = await nebulaRequest('/enrollment/enable', {

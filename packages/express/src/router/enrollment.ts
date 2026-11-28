@@ -86,6 +86,19 @@ export function createEnrollmentRouter(core: CoreNebula, adminAuth: RequestHandl
 		}),
 	)
 
+	// Admin: get enrollement requests
+	router.get(
+		'/enrollment/requests',
+		adminAuth,
+		asyncHandler(async (req, res) => {
+			const requests = await core.enrollment.getRequests()
+			return res.json({
+				success: true,
+				data: requests,
+			})
+		}),
+	)
+
 	// Admin: approve a pending request and assign it to an application.
 	router.post(
 		'/enrollment/requests/:requestId/approve',

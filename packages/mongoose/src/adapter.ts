@@ -7,6 +7,7 @@ import type {
 	EnrollmentRequest,
 	StorageAdapter,
 	Session,
+	EnrollmentRequestResponse,
 } from '@nebula-sdk/core'
 
 import { initializeNebulaModels, createNebulaModels } from './models.js'
@@ -81,6 +82,10 @@ export class MongooseAdapter implements StorageAdapter {
 		now: number,
 	): Promise<Device | null> {
 		return this.enrollment.approveEnrollment(requestId, applicationId, deviceId, now)
+	}
+
+	getEnrollmentReuests(): Promise<EnrollmentRequestResponse[]> {
+		return this.enrollment.getEnrollmentRequests()
 	}
 
 	getDevice(id: string): Promise<Device | null> {

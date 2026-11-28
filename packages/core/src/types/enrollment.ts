@@ -11,3 +11,5 @@ export interface EnrollmentRequest {
 	createdAt: number
 	expiresAt: number
 }
+
+export type EnrollmentRequestResponse = Omit<EnrollmentRequest, 'codeHash'>

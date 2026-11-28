@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import type { NebulaConfig } from '../types/config.js'
 import type { DeviceInfo, Device } from '../types/device.js'
-import type { EnrollmentRequest } from '../types/enrollment.js'
+import type { EnrollmentRequest, EnrollmentRequestResponse } from '../types/enrollment.js'
 
 import { EnrollmentError } from '../errors/index.js'
 
@@ -21,6 +21,10 @@ export interface EnrollmentWindow {
 
 export class EnrollmentService {
 	constructor(private readonly config: NebulaConfig) {}
+
+	async getRequests(): Promise<EnrollmentRequestResponse[]> {
+		return this.config.storage.getEnrollmentReuests()
+	}
 
 	async enable(): Promise<EnrollmentWindow> {
 		const now = Date.now()

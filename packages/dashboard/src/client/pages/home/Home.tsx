@@ -77,6 +77,7 @@ export default function Home() {
 		applications,
 		setApplications,
 		devices,
+		setDevices,
 		loading,
 		error,
 	}

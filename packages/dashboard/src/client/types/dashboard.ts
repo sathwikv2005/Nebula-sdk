@@ -8,6 +8,8 @@ export interface DashboardContext {
 	setApplications: Dispatch<SetStateAction<Application[]>>
 
 	devices: Device[]
+	setDevices: Dispatch<SetStateAction<Device[]>>
+
 	loading: boolean
 	error: string
 }

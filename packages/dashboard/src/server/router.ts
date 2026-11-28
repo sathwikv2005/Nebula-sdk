@@ -9,6 +9,7 @@ const CLIENT_PATH = path.resolve(__dirname, '../client')
 const defaultDashboardOptions: Required<DashboardOptions> = {
 	apiRoute: '/_nebula/admin',
 	title: 'Nebula Admin Dashboard',
+	loginPath: null,
 }
 
 export function createDashboardRouter(options: DashboardOptions = {}): Router {
@@ -16,6 +17,7 @@ export function createDashboardRouter(options: DashboardOptions = {}): Router {
 
 	const apiRoute = options.apiRoute ?? defaultDashboardOptions.apiRoute
 	const title = options.title ?? defaultDashboardOptions.title
+	const loginPath = options.loginPath ?? defaultDashboardOptions.loginPath
 
 	if (!apiRoute.startsWith('/') || apiRoute.startsWith('//')) {
 		throw new Error(`apiRoute must be a root-relative path like '/_nebula/admin'`)
@@ -35,6 +37,10 @@ export function createDashboardRouter(options: DashboardOptions = {}): Router {
 			apiRoute,
 			title,
 			basePath: req.baseUrl,
+			loginPath: loginPath
+				? new URL(loginPath, `${req.protocol}://${req.get('host')}`).toString()
+				: '/login',
+			customLogin: !!loginPath,
 		})
 			.replace(/</g, '\\u003c')
 			.replace(/>/g, '\\u003e')

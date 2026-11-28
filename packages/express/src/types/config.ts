@@ -50,6 +50,8 @@ export interface BuiltInAdminAuthOptions {
 
 	/** Cannot be provided when using built-in admin authentication. */
 	adminAuth?: never
+	/** Cannot be provided when using built-in admin authentication. */
+	loginPath?: never
 }
 
 /**
@@ -58,6 +60,9 @@ export interface BuiltInAdminAuthOptions {
 export interface CustomAdminAuthOptions {
 	/** Middleware used to authenticate requests to Nebula's admin routes. */
 	adminAuth: RequestHandler
+
+	/** Login path to your login system */
+	loginPath: string
 
 	/** Cannot be provided when using custom admin authentication. */
 	admin?: never

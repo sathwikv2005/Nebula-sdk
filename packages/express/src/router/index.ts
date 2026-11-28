@@ -17,6 +17,7 @@ const ROUTE_PREFIX = '/_nebula'
 export function createNebulaRouter(
 	core: CoreNebula,
 	adminAuth: RequestHandler,
+	loginPath?: string,
 	adminStorage?: AdminMongoAdapter,
 	errorHandler?: ErrorRequestHandler,
 	enableDeviceAuthOnAllRoutes?: boolean,
@@ -27,7 +28,7 @@ export function createNebulaRouter(
 	nebulaRouter.use(express.json())
 
 	//dashboard
-	nebulaRouter.use('/dashboard', createDashboardRouter({ apiRoute: `${ROUTE_PREFIX}` }))
+	nebulaRouter.use('/dashboard', createDashboardRouter({ apiRoute: `${ROUTE_PREFIX}`, loginPath }))
 
 	nebulaRouter.use('/admin', createAdminRouter(adminAuth, adminStorage))
 	nebulaRouter.use('/auth', createAuthRouter(core))

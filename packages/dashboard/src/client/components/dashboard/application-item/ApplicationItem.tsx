@@ -78,7 +78,7 @@ export default function ApplicationItem({ application, onEdit, onDelete }: Appli
 			{expanded && (
 				<div className={styles.details}>
 					<Detail label="Name" value={application.name} />
-					<Detail label="Application ID" value={application.id} mono />
+					<Detail label="Device Count" value={application.deviceCount.toString()} mono />
 					<Detail label="Created At" value={formatDate(application.createdAt)} />
 					<Detail label="Last Updated" value={formatDate(application.updatedAt)} />
 
